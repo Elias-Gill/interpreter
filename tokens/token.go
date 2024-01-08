@@ -14,6 +14,7 @@ const (
 	FUNCTION = "FUNCTION"
 	IDENT    = "IDENT"
 	IF       = "IF"
+	ELSE     = "ELSE"
 	FOR      = "FOR"
 	RETURN   = "RETURN"
 	DATATYPE = "DATATYPE" // a datatype declaration token
@@ -30,30 +31,37 @@ const (
 	ILLEGAL   = "ILLEGAL"
 
 	// operators
-	PLUS    = "PLUS"
-	MINUS   = "MINUS"
-	ASIGN   = "ASIGN"
-	COMPARE = "COMPARE"
+	PLUS     = "PLUS"
+	MINUS    = "MINUS"
+	ASTERISC = "ASTERISC"
+	BANG     = "BANG"
+	COMMA    = "COMMA"
+	ASIGN    = "ASIGN"
+	EQUALS   = "EQUALS"
+	NOTEQUAL = "NOTEQUAL"
 
 	// brackets and parenteses
 	LBRAC = "LBRAC"
 	RBRAC = "RBRAC"
 	LPAR  = "LPAR"
 	RPAR  = "RPAR"
+	LT    = "LT"
+	GT    = "GT"
 )
 
 var keywords = map[string]TokenType{
 	"func":   FUNCTION,
 	"var":    VAR,
-	"true":   BOOL,
-	"false":  BOOL,
 	"si":     IF,
+	"sino":   ELSE,
 	"desde":  FOR,
 	"return": RETURN,
 
-	// datatypes keywords
+	// datatype keywords
 	"entero": DATATYPE,
 	"cadena": DATATYPE,
+	"true":   BOOL,
+	"false":  BOOL,
 }
 
 func TokenizeIdent(ident string) TokenType {

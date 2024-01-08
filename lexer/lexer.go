@@ -27,17 +27,35 @@ func (l *Lexer) NexToken() tokens.Token {
 
 	// start generating tokens
 	switch l.ch {
+	// operators
 	case '-':
 		token = newSingleToken(tokens.MINUS, l.ch)
 	case '+':
 		token = newSingleToken(tokens.PLUS, l.ch)
+	case '*':
+		token = newSingleToken(tokens.ASTERISC, l.ch)
+	case '<':
+		token = newSingleToken(tokens.LT, l.ch)
+	case '>':
+		token = newSingleToken(tokens.GT, l.ch)
+	case '!':
+		l.readChar()
+		if l.ch == '=' {
+			token = newMultiToken(tokens.NOTEQUAL, "!=")
+		} else {
+			return newSingleToken(tokens.BANG, '!')
+		}
 	case '=':
 		l.readChar()
 		if l.ch == '=' {
-			token = newMultiToken(tokens.COMPARE, "==")
+			token = newMultiToken(tokens.EQUALS, "==")
 		} else {
 			return newSingleToken(tokens.ASIGN, '=')
 		}
+
+		// especial chars
+	case ',':
+		token = newSingleToken(tokens.COMMA, l.ch)
 	case ';':
 		token = newSingleToken(tokens.SEMICOLON, l.ch)
 	case ':':
@@ -51,10 +69,9 @@ func (l *Lexer) NexToken() tokens.Token {
 	case '(':
 		token = newSingleToken(tokens.LPAR, l.ch)
 	case 0:
-		token.Literal = ""
-		token.Type = tokens.EOF
+		token = newMultiToken(tokens.EOF, "")
 
-		// the default case are keywords and identifiers
+		// keywords and identifiers (aka, multi-char tokens)
 	default:
 		if isLetter(l.ch) {
 			ident := l.extractIdentifier()
@@ -66,7 +83,7 @@ func (l *Lexer) NexToken() tokens.Token {
 			return newMultiToken(tokens.NUMBER, l.extractNumber())
 		}
 
-		return newSingleToken(tokens.ILLEGAL, l.ch)
+		token = newSingleToken(tokens.ILLEGAL, l.ch)
 	}
 
 	l.readChar()

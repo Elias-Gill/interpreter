@@ -6,15 +6,15 @@ import (
 	"github.com/sl2.0/tokens"
 )
 
-type testCase struct {
-	input    string
-	expected []tokens.Token
-}
-
 func TestNextToken(t *testing.T) {
+	type testCase struct {
+		input    string
+		expected []tokens.Token
+	}
+
 	testCases := []testCase{
 		{
-			`+-:={}()==`,
+			`+-:={}()==!*,;<>!=`,
 			[]tokens.Token{
 				{Type: tokens.PLUS, Literal: "+"},
 				{Type: tokens.MINUS, Literal: "-"},
@@ -24,7 +24,14 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.LPAR, Literal: "("},
 				{Type: tokens.RPAR, Literal: ")"},
-				{Type: tokens.COMPARE, Literal: "=="},
+				{Type: tokens.EQUALS, Literal: "=="},
+				{Type: tokens.BANG, Literal: "!"},
+				{Type: tokens.ASTERISC, Literal: "*"},
+				{Type: tokens.COMMA, Literal: ","},
+				{Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.LT, Literal: "<"},
+				{Type: tokens.GT, Literal: ">"},
+				{Type: tokens.NOTEQUAL, Literal: "!="},
 			},
 		},
 
@@ -70,7 +77,7 @@ func TestNextToken(t *testing.T) {
 
 				{Type: tokens.IF, Literal: "si"},
 				{Type: tokens.IDENT, Literal: "algo"},
-				{Type: tokens.COMPARE, Literal: "=="},
+				{Type: tokens.EQUALS, Literal: "=="},
 				{Type: tokens.BOOL, Literal: "true"},
 				{Type: tokens.LBRAC, Literal: "{"},
 				{Type: tokens.RETURN, Literal: "return"},
@@ -81,7 +88,18 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.IDENT, Literal: "nombre"},
 
 				{Type: tokens.RBRAC, Literal: "}"},
-                {Type: tokens.EOF, Literal: ""},
+				{Type: tokens.EOF, Literal: ""},
+			},
+		},
+		{
+			`~@#$^&`,
+			[]tokens.Token{
+				{Type: tokens.ILLEGAL, Literal: "~"},
+				{Type: tokens.ILLEGAL, Literal: "@"},
+				{Type: tokens.ILLEGAL, Literal: "#"},
+				{Type: tokens.ILLEGAL, Literal: "$"},
+				{Type: tokens.ILLEGAL, Literal: "^"},
+				{Type: tokens.ILLEGAL, Literal: "&"},
 			},
 		},
 	}
@@ -92,8 +110,11 @@ func TestNextToken(t *testing.T) {
 		for i := 0; i < len(test.expected); i++ {
 			token := lexer.NexToken()
 			if token.Type != test.expected[i].Type || token.Literal != test.expected[i].Literal {
-				t.Fatalf("\nExpected token type to be: %s \n\tGot: %s \nExpected token value to be: %s \n\tGot: %s \nTest case: %d, token %d", test.expected[i].Type, token.Type,
-					test.expected[i].Literal, token.Literal, id+1, i)
+				t.Fatalf("\nExpected token type: %s \n\tGot: %s \n\nExpected token value: %s \n\tGot: %s \nTest case: %d, token %d",
+					test.expected[i].Type, token.Type,
+					test.expected[i].Literal, token.Literal,
+					id+1, i,
+				)
 			}
 		}
 	}
