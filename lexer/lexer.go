@@ -77,7 +77,13 @@ func (l *Lexer) NexToken() tokens.Token {
 	case '+':
 		token = newToken(tokens.PLUS, l.ch)
 	case '=':
-		token = newToken(tokens.ASIGN, l.ch)
+		l.readChar()
+		if l.ch == '=' {
+			token.Type = tokens.COMPARE
+			token.Literal = "=="
+		} else {
+			return newToken(tokens.ASIGN, '=')
+		}
 	case ';':
 		token = newToken(tokens.SEMICOLON, l.ch)
 	case ':':
@@ -103,11 +109,11 @@ func (l *Lexer) NexToken() tokens.Token {
 			// one char more than expected
 			return token
 		} else if isNumber(l.ch) {
-            number := l.extractNumber()
-            token.Literal = number
-            token.Type = tokens.INTEGER
+			number := l.extractNumber()
+			token.Literal = number
+			token.Type = tokens.INTEGER
 
-            return token
+			return token
 		} else {
 			return newToken(tokens.ILLEGAL, l.ch)
 		}
