@@ -13,15 +13,15 @@ const (
 	VAR      = "VAR"
 	FUNCTION = "FUNCTION"
 	IDENT    = "IDENT"
-	NUMBER   = "NUMBER"
 	IF       = "IF"
 	FOR      = "FOR"
 	RETURN   = "RETURN"
+	DATATYPE = "DATATYPE" // a datatype declaration token
 
-	// data types
-	INTEGER = "INTEGER"
-	STRING  = "STRING"
-	BOOL    = "BOOL"
+	// primitive data types
+	NUMBER = "NUMBER"
+	STRING = "STRING"
+	BOOL   = "BOOL"
 
 	// especial characters
 	COLON     = "COLON"
@@ -45,13 +45,15 @@ const (
 var keywords = map[string]TokenType{
 	"func":   FUNCTION,
 	"var":    VAR,
-	"entero": NUMBER,
 	"true":   BOOL,
 	"false":  BOOL,
 	"si":     IF,
 	"desde":  FOR,
-	"cadena": STRING,
-    "return": RETURN,
+	"return": RETURN,
+
+	// datatypes keywords
+	"entero": DATATYPE,
+	"cadena": DATATYPE,
 }
 
 func TokenizeIdent(ident string) TokenType {

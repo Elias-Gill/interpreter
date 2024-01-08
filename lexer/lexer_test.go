@@ -24,7 +24,7 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.LPAR, Literal: "("},
 				{Type: tokens.RPAR, Literal: ")"},
-                {Type: tokens.COMPARE, Literal: "=="},
+				{Type: tokens.COMPARE, Literal: "=="},
 			},
 		},
 
@@ -34,9 +34,9 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.VAR, Literal: "var"},
 				{Type: tokens.IDENT, Literal: "nuevo"},
 				{Type: tokens.COLON, Literal: ":"},
-				{Type: tokens.NUMBER, Literal: "entero"},
+				{Type: tokens.DATATYPE, Literal: "entero"},
 				{Type: tokens.ASIGN, Literal: "="},
-				{Type: tokens.INTEGER, Literal: "22"},
+				{Type: tokens.NUMBER, Literal: "22"},
 				{Type: tokens.SEMICOLON, Literal: ";"},
 				{Type: tokens.EOF, Literal: ""},
 			},
@@ -56,17 +56,17 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.LPAR, Literal: "("},
 				{Type: tokens.IDENT, Literal: "nombre"},
 				{Type: tokens.COLON, Literal: ":"},
-				{Type: tokens.STRING, Literal: "cadena"},
+				{Type: tokens.DATATYPE, Literal: "cadena"},
 				{Type: tokens.RPAR, Literal: ")"},
 				{Type: tokens.COLON, Literal: ":"},
-				{Type: tokens.NUMBER, Literal: "entero"},
+				{Type: tokens.DATATYPE, Literal: "entero"},
 
 				{Type: tokens.LBRAC, Literal: "{"},
 
 				{Type: tokens.VAR, Literal: "var"},
 				{Type: tokens.IDENT, Literal: "auxiliar"},
 				{Type: tokens.COLON, Literal: ":"},
-				{Type: tokens.NUMBER, Literal: "entero"},
+				{Type: tokens.DATATYPE, Literal: "entero"},
 
 				{Type: tokens.IF, Literal: "si"},
 				{Type: tokens.IDENT, Literal: "algo"},
@@ -81,6 +81,7 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.IDENT, Literal: "nombre"},
 
 				{Type: tokens.RBRAC, Literal: "}"},
+                {Type: tokens.EOF, Literal: ""},
 			},
 		},
 	}
