@@ -30,6 +30,14 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
+func (l Lexer) pickChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
 func isLetter(ch byte) bool {
 	return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '_'
 }
@@ -59,7 +67,13 @@ func (l *Lexer) extractNumber() string {
 }
 
 func (l *Lexer) burnWhiteSpaces() {
-	for l.ch == ' ' || l.ch == '\n' || l.ch == '\t' || l.ch == '\r' {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+
+func (l *Lexer) skipLineBreaks() {
+	for l.ch == '\n' {
 		l.readChar()
 	}
 }

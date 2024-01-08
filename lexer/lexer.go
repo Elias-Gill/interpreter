@@ -68,6 +68,9 @@ func (l *Lexer) NexToken() tokens.Token {
 		token = newSingleToken(tokens.RPAR, l.ch)
 	case '(':
 		token = newSingleToken(tokens.LPAR, l.ch)
+	case '\n':
+        l.skipLineBreaks()
+		token = newMultiToken(tokens.LINEBREAK, "")
 	case 0:
 		token = newMultiToken(tokens.EOF, "")
 
@@ -76,7 +79,7 @@ func (l *Lexer) NexToken() tokens.Token {
 		if isLetter(l.ch) {
 			ident := l.extractIdentifier()
 			// early return to prevent reading (and skipping) the next char
-			return newMultiToken(tokens.TokenizeIdent(ident), ident)
+			return newMultiToken(tokens.ResolveIdent(ident), ident)
 		}
 
 		if isNumber(l.ch) {

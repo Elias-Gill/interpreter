@@ -13,8 +13,11 @@ func TestNextToken(t *testing.T) {
 	}
 
 	testCases := []testCase{
-		{
-			`+-:={}()==!*,;<>!=`,
+		{ // especial tokens (kee an eye on the line break)
+			`+-:={}()==!*,;<>!=
+            =
+
+            `,
 			[]tokens.Token{
 				{Type: tokens.PLUS, Literal: "+"},
 				{Type: tokens.MINUS, Literal: "-"},
@@ -32,6 +35,10 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.LT, Literal: "<"},
 				{Type: tokens.GT, Literal: ">"},
 				{Type: tokens.NOTEQUAL, Literal: "!="},
+                {Type: tokens.LINEBREAK, Literal: ""},
+                {Type: tokens.ASIGN, Literal: "="},
+                {Type: tokens.LINEBREAK, Literal: ""},
+                {Type: tokens.EOF, Literal: ""},
 			},
 		},
 
@@ -69,29 +76,40 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.DATATYPE, Literal: "entero"},
 
 				{Type: tokens.LBRAC, Literal: "{"},
+                {Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.VAR, Literal: "var"},
 				{Type: tokens.IDENT, Literal: "auxiliar"},
 				{Type: tokens.COLON, Literal: ":"},
 				{Type: tokens.DATATYPE, Literal: "entero"},
 
+                {Type: tokens.LINEBREAK, Literal: ""},
+
 				{Type: tokens.IF, Literal: "si"},
 				{Type: tokens.IDENT, Literal: "algo"},
 				{Type: tokens.EQUALS, Literal: "=="},
 				{Type: tokens.BOOL, Literal: "true"},
 				{Type: tokens.LBRAC, Literal: "{"},
+
+                {Type: tokens.LINEBREAK, Literal: ""},
+
 				{Type: tokens.RETURN, Literal: "return"},
 				{Type: tokens.BOOL, Literal: "false"},
+                {Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
+
+                {Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RETURN, Literal: "return"},
 				{Type: tokens.IDENT, Literal: "nombre"},
+
+                {Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.EOF, Literal: ""},
 			},
 		},
-		{
+		{ // invalid tokens
 			`~@#$^&`,
 			[]tokens.Token{
 				{Type: tokens.ILLEGAL, Literal: "~"},

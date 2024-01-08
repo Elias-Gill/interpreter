@@ -28,6 +28,7 @@ const (
 	COLON     = "COLON"
 	SEMICOLON = "SEMICOLON"
 	EOF       = "EOF"
+	LINEBREAK = "LINEBREAK"
 	ILLEGAL   = "ILLEGAL"
 
 	// operators
@@ -64,7 +65,7 @@ var keywords = map[string]TokenType{
 	"false":  BOOL,
 }
 
-func TokenizeIdent(ident string) TokenType {
+func ResolveIdent(ident string) TokenType {
 	if ty, ok := keywords[ident]; ok {
 		return ty
 	}
