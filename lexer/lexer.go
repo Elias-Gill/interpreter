@@ -3,10 +3,10 @@ package lexer
 import "github.com/sl2.0/tokens"
 
 type Lexer struct {
-	input        string
-	position     int // position of the current character
-	readPosition int // position of the next character
-	ch           byte
+	input           string
+	currentPosition int // position of the current character
+	nextPosition    int // position of the next character
+	ch              byte
 }
 
 func NewLexer(input string) *Lexer {
@@ -39,18 +39,20 @@ func (l *Lexer) NexToken() tokens.Token {
 	case '>':
 		token = newSingleToken(tokens.GT, l.ch)
 	case '!':
-		l.readChar()
-		if l.ch == '=' {
+		ch := l.pickChar()
+		if ch == '=' {
 			token = newMultiToken(tokens.NOTEQUAL, "!=")
+            l.readChar()
 		} else {
-			return newSingleToken(tokens.BANG, '!')
+			token = newSingleToken(tokens.BANG, '!')
 		}
 	case '=':
-		l.readChar()
-		if l.ch == '=' {
+		ch := l.pickChar()
+		if ch == '=' {
 			token = newMultiToken(tokens.EQUALS, "==")
+            l.readChar()
 		} else {
-			return newSingleToken(tokens.ASIGN, '=')
+			token = newSingleToken(tokens.ASIGN, '=')
 		}
 
 		// especial chars
@@ -69,7 +71,7 @@ func (l *Lexer) NexToken() tokens.Token {
 	case '(':
 		token = newSingleToken(tokens.LPAR, l.ch)
 	case '\n':
-        l.skipLineBreaks()
+		l.skipLineBreaks()
 		token = newMultiToken(tokens.LINEBREAK, "")
 	case 0:
 		token = newMultiToken(tokens.EOF, "")

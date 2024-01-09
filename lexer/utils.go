@@ -20,21 +20,22 @@ func newMultiToken(ty tokens.TokenType, lit string) tokens.Token {
 
 // reads a new character and advances the lexer state
 func (l *Lexer) readChar() {
-	if l.readPosition >= len(l.input) {
+	if l.nextPosition >= len(l.input) {
 		l.ch = 0
 	} else {
-		l.ch = l.input[l.readPosition]
+		l.ch = l.input[l.nextPosition]
 	}
 
-	l.position = l.readPosition
-	l.readPosition++
+	l.currentPosition = l.nextPosition
+	l.nextPosition++
 }
 
+// reads a new character WITHOUT changing the lexer state an returns the caracter
 func (l Lexer) pickChar() byte {
-	if l.readPosition >= len(l.input) {
+	if l.nextPosition >= len(l.input) {
 		return 0
 	} else {
-		return l.input[l.readPosition]
+		return l.input[l.nextPosition]
 	}
 }
 
@@ -43,13 +44,13 @@ func isLetter(ch byte) bool {
 }
 
 func (l *Lexer) extractIdentifier() string {
-	auxPos := l.position
+	auxPos := l.currentPosition
 
 	for isLetter(l.ch) {
 		l.readChar()
 	}
 
-	return l.input[auxPos:l.position]
+	return l.input[auxPos:l.currentPosition]
 }
 
 func isNumber(ch byte) bool {
@@ -57,13 +58,13 @@ func isNumber(ch byte) bool {
 }
 
 func (l *Lexer) extractNumber() string {
-	auxPos := l.position
+	auxPos := l.currentPosition
 
 	for isNumber(l.ch) {
 		l.readChar()
 	}
 
-	return l.input[auxPos:l.position]
+	return l.input[auxPos:l.currentPosition]
 }
 
 func (l *Lexer) burnWhiteSpaces() {
