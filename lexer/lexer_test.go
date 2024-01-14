@@ -15,7 +15,7 @@ func TestNextToken(t *testing.T) {
 	testCases := []testCase{
 		{ // especial tokens (kee an eye on the line break)
 			`+-:={}()==!*,;<>!=
-            =
+            =/
 
             `,
 			[]tokens.Token{
@@ -37,6 +37,7 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.NOTEQUAL, Literal: "!="},
                 {Type: tokens.LINEBREAK, Literal: ""},
                 {Type: tokens.ASIGN, Literal: "="},
+                {Type: tokens.STROKE, Literal: "/"},
                 {Type: tokens.LINEBREAK, Literal: ""},
                 {Type: tokens.EOF, Literal: ""},
 			},

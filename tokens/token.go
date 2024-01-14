@@ -37,9 +37,10 @@ const (
 	ASTERISC = "ASTERISC"
 	BANG     = "BANG"
 	COMMA    = "COMMA"
-	ASIGN    = "ASIGN"
-	EQUALS   = "EQUALS"
+	ASIGN    = "ASIGN"  // =
+	EQUALS   = "EQUALS" // ==
 	NOTEQUAL = "NOTEQUAL"
+	STROKE   = "STROKE"
 
 	// brackets and parenteses
 	LBRAC = "LBRAC"
