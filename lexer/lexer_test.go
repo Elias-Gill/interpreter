@@ -35,11 +35,11 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.LT, Literal: "<"},
 				{Type: tokens.GT, Literal: ">"},
 				{Type: tokens.NOTEQUAL, Literal: "!="},
-                {Type: tokens.LINEBREAK, Literal: ""},
-                {Type: tokens.ASIGN, Literal: "="},
-                {Type: tokens.STROKE, Literal: "/"},
-                {Type: tokens.LINEBREAK, Literal: ""},
-                {Type: tokens.EOF, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.ASIGN, Literal: "="},
+				{Type: tokens.STROKE, Literal: "/"},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.EOF, Literal: ""},
 			},
 		},
 
@@ -77,14 +77,14 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.DATATYPE, Literal: "entero"},
 
 				{Type: tokens.LBRAC, Literal: "{"},
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.VAR, Literal: "var"},
 				{Type: tokens.IDENT, Literal: "auxiliar"},
 				{Type: tokens.COLON, Literal: ":"},
 				{Type: tokens.DATATYPE, Literal: "entero"},
 
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.IF, Literal: "si"},
 				{Type: tokens.IDENT, Literal: "algo"},
@@ -92,19 +92,19 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.BOOL, Literal: "true"},
 				{Type: tokens.LBRAC, Literal: "{"},
 
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RETURN, Literal: "return"},
 				{Type: tokens.BOOL, Literal: "false"},
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
 
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RETURN, Literal: "return"},
 				{Type: tokens.IDENT, Literal: "nombre"},
 
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.EOF, Literal: ""},

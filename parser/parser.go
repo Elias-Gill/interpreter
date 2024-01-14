@@ -63,13 +63,13 @@ func (p *Parser) parseReturn() *ast.ReturnStatement {
 		Token: p.currentToken,
 	}
 
-    // TODO: parse expressions
+	// TODO: parse expressions
 	for p.currentToken.Type != tokens.SEMICOLON {
 		p.advanceToken()
-        if tokens.EOF == p.currentToken.Type {
-            p.newParserError(`Expected ";" in return statement`)
-            return nil
-        }
+		if tokens.EOF == p.currentToken.Type {
+			p.newParserError(`Expected ";" in return statement`)
+			return nil
+		}
 	}
 
 	return stmt
@@ -95,9 +95,9 @@ func (p *Parser) parseVarDeclaration() *ast.VarStatement {
 		return nil
 	}
 
-    // TODO: parse expressions
+	// TODO: parse expressions
 	for p.currentToken.Type != tokens.SEMICOLON {
-        p.advanceToken()
+		p.advanceToken()
 		// p.parseExpression()
 	}
 

@@ -14,7 +14,7 @@ func Start(in io.Reader, out io.Writer) {
 
 	// read with an infinit loop
 	for {
-        fmt.Print(">>> ")
+		fmt.Print(">>> ")
 
 		hasNext := scanner.Scan()
 		if !hasNext {
@@ -22,9 +22,9 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
-        if line == "exit" {
-            return 
-        }
+		if line == "exit" {
+			return
+		}
 
 		l := lexer.NewLexer(line)
 
@@ -32,6 +32,6 @@ func Start(in io.Reader, out io.Writer) {
 			fmt.Printf("\n[Type: %v, Literal: '%v']", token.Type, token.Literal)
 		}
 
-        fmt.Print("\n\n")
+		fmt.Print("\n\n")
 	}
 }

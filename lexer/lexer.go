@@ -34,8 +34,8 @@ func (l *Lexer) NexToken() tokens.Token {
 		token = newSingleToken(tokens.PLUS, l.ch)
 	case '*':
 		token = newSingleToken(tokens.ASTERISC, l.ch)
-    case '/':
-        token = newSingleToken(tokens.STROKE, l.ch)
+	case '/':
+		token = newSingleToken(tokens.STROKE, l.ch)
 	case '<':
 		token = newSingleToken(tokens.LT, l.ch)
 	case '>':
@@ -44,7 +44,7 @@ func (l *Lexer) NexToken() tokens.Token {
 		ch := l.pickChar()
 		if ch == '=' {
 			token = newMultiToken(tokens.NOTEQUAL, "!=")
-            l.readChar()
+			l.readChar()
 		} else {
 			token = newSingleToken(tokens.BANG, '!')
 		}
@@ -52,7 +52,7 @@ func (l *Lexer) NexToken() tokens.Token {
 		ch := l.pickChar()
 		if ch == '=' {
 			token = newMultiToken(tokens.EQUALS, "==")
-            l.readChar()
+			l.readChar()
 		} else {
 			token = newSingleToken(tokens.ASIGN, '=')
 		}
