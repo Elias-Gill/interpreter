@@ -46,6 +46,7 @@ func NewParser(input string) *Parser {
 	parser.advanceToken()
 
 	parser.registerPrefix(tokens.IDENT, parser.parseIdentifier)
+    parser.registerPrefix(tokens.NUMBER, parser.parseNumber)
 
 	// register infix parsing functions
 
@@ -161,4 +162,8 @@ func (p *Parser) parseGroupedExpression() *ast.Expression { return nil }
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return ast.NewIdentifier(p.currentToken)
+}
+
+func (p *Parser) parseNumber() ast.Expression {
+    return ast.NewIdentifier(p.currentToken)
 }
