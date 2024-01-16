@@ -103,7 +103,50 @@ func TestReturn(t *testing.T) {
 
 }
 
+func TestIdentifierExpression(t *testing.T) {
+    tc := testCase{
+        input: `
+        persona;
+        x;
+        y;
+        `,
+        numStatms: 3,
+    }
+
+    parser := NewParser(tc.input)
+    p := parser.ParseProgram()
+
+    // if the parsing stage has errors, the test will FailNow()
+    checkErrors(t, parser)
+
+    if p == nil {
+        t.Fatalf("ParseProgram() returned nil")
+    }
+
+    if len(p.Statements) != tc.numStatms {
+        t.Fatalf("Number of statements must be: %d\n Found: %d",
+            tc.numStatms, len(p.Statements),
+        )
+    }
+
+    for _, value := range p.Statements {
+        // try to convert to type VarStatement
+        exp, ok := value.(*ast.ExpressionStatement)
+        if !ok {
+            t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
+        }
+
+        _, ok = exp.Expression.(*ast.Identifier)
+        if !ok {
+            t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
+        }
+    }
+
+}
+
+// -----------------------
 // --- UTILS for tests ---
+// -----------------------
 
 func testIndVar(t *testing.T, p *ast.Ast, tc testCase) {
 	hasErros := false

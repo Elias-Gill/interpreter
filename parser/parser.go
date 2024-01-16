@@ -6,30 +6,50 @@ import (
 	"github.com/sl2.0/tokens"
 )
 
+type (
+	prefixFn func() ast.Expression
+	infixFn  func(ast.Expression) ast.Expression
+)
+
 type Parser struct {
 	lexer  *lexer.Lexer
 	errors []string
 
 	currentToken tokens.Token
 	nextToken    tokens.Token
+
+	infixParseFns  map[tokens.TokenType]infixFn
+	prefixParseFns map[tokens.TokenType]prefixFn
 }
+
+const (
+	LOWEST    = iota
+	EQUALS    // ==
+	GREATLESS // < >
+	SUM       // + -
+	MULT      // * /
+	PREFIX    // -X  !X
+	CALL      // foo(bar)
+)
 
 func NewParser(input string) *Parser {
 	parser := &Parser{
 		lexer:  lexer.NewLexer(input),
 		errors: []string{},
+
+		infixParseFns:  make(map[tokens.TokenType]infixFn),
+		prefixParseFns: make(map[tokens.TokenType]prefixFn),
 	}
 
-	// advance tokens two times to setup the parser
-	// in the correct initial state (like we did with the lexer)
+	// to setup the parser in the correct initial state
 	parser.advanceToken()
 	parser.advanceToken()
+
+	parser.registerPrefix(tokens.IDENT, parser.parseIdentifier)
+
+	// register infix parsing functions
 
 	return parser
-}
-
-func (p *Parser) Errors() []string {
-	return p.errors
 }
 
 func (p *Parser) ParseProgram() *ast.Ast {
@@ -41,6 +61,7 @@ func (p *Parser) ParseProgram() *ast.Ast {
 		if stmt != nil {
 			tree.Statements = append(tree.Statements, stmt)
 		}
+
 		p.advanceToken()
 	}
 
@@ -53,9 +74,26 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVarDeclaration()
 	case tokens.RETURN:
 		return p.parseReturn()
-	default:
+	case tokens.LINEBREAK:
+		// TODO: ver que onda
 		return nil
+	default:
+		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{
+		Token:      p.currentToken,
+		Expression: p.parseExpression(LOWEST),
+	}
+
+	// to support expression with optional semicolon
+	if p.nextToken.Type == tokens.SEMICOLON {
+		p.advanceToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseReturn() *ast.ReturnStatement {
@@ -104,24 +142,23 @@ func (p *Parser) parseVarDeclaration() *ast.VarStatement {
 	return stmt
 }
 
-func (p *Parser) parseExpression() *ast.Expression {
-	var expression *ast.Expression
+// ------------------------------------------
+// ----- Parsing expression functions -------
+// ------------------------------------------
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.currentToken.Type]
 
-	p.advanceToken()
-	switch p.currentToken.Type {
-	case tokens.NUMBER:
-
-	case tokens.IDENT:
-
-	case tokens.SEMICOLON:
-		return expression
-
-	default:
-		p.newParserError("no se, un error")
+	if prefix == nil {
 		return nil
 	}
 
-	return nil
+	leftExpr := prefix()
+
+	return leftExpr
 }
 
 func (p *Parser) parseGroupedExpression() *ast.Expression { return nil }
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return ast.NewIdentifier(p.currentToken)
+}
