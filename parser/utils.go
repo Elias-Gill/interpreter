@@ -21,10 +21,28 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-func (p *Parser) registerInfix(t tokens.TokenType, f infixFn) {
+func (p *Parser) registerInfixFn(t tokens.TokenType, f infixFn) {
 	p.infixParseFns[t] = f
 }
 
-func (p *Parser) registerPrefix(t tokens.TokenType, f prefixFn) {
+func (p *Parser) registerPrefixFn(t tokens.TokenType, f prefixFn) {
 	p.prefixParseFns[t] = f
+}
+
+func (p *Parser) curPrecendence() int {
+	value, ok := precedences[string(p.currentToken.Type)]
+    if !ok {
+        return LOWEST
+    }
+
+	return value
+}
+
+func (p *Parser) nextPrecendence() int {
+    value, ok := precedences[string(p.nextToken.Type)]
+    if !ok {
+        return LOWEST
+    }
+
+    return value
 }

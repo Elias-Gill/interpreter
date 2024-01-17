@@ -39,7 +39,7 @@ func TestVarDeclaration(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		t.Logf("\n%sRunning test case %d%s", colorMagenta, i, colorNone)
+		t.Logf("\n%sRunning test case %d%s", colorMagenta, i+1, colorNone)
 
 		parser := NewParser(tc.input)
 		p := parser.ParseProgram()
@@ -67,8 +67,7 @@ func TestReturn(t *testing.T) {
 		input: `
             return persona;
             return x;
-            return y + 21;
-            `,
+            return y + 21;`,
 		numStatms: 3,
 	}
 

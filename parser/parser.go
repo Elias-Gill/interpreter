@@ -40,6 +40,7 @@ var precedences = map[string]int{
 	tokens.LT:       GREATLESS,
 	tokens.GT:       GREATLESS,
 	tokens.PLUS:     SUM,
+	tokens.MINUS:    SUM,
 	tokens.ASTERISC: PROD,
 	tokens.SLASH:    PROD,
 	tokens.FUNCTION: CALL,
@@ -59,11 +60,14 @@ func NewParser(input string) *Parser {
 	parser.advanceToken()
 	parser.advanceToken()
 
-	parser.registerPrefix(tokens.IDENT, parser.parseIdentifier)
-	parser.registerPrefix(tokens.NUMBER, parser.parseNumber)
-	parser.registerPrefix(tokens.LPAR, parser.parseGroupedExpression)
+	parser.registerPrefixFn(tokens.IDENT, parser.parseIdentifier)
+	parser.registerPrefixFn(tokens.NUMBER, parser.parseNumber)
+	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)
+	parser.registerPrefixFn(tokens.BANG, parser.parsePrefixExpression)
+	parser.registerPrefixFn(tokens.MINUS, parser.parsePrefixExpression)
 
-	// register infix parsing functions
+	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
+	// parser.registerInfix(tokens.LPAR, parser.parseCall)
 
 	return parser
 }
@@ -96,7 +100,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case tokens.RETURN:
 		return p.parseReturn()
 	case tokens.LINEBREAK:
-		// Do nothing for now (TODO)
+		// Do nothing for now (TODO:)
 		return nil
 	default:
 		return p.parseExpressionStatement()
@@ -138,7 +142,6 @@ func (p *Parser) parseVarDeclaration() *ast.VarStatement {
 		Token: p.currentToken,
 	}
 
-	// set the identifier
 	p.advanceToken()
 
 	if p.currentToken.Type != tokens.IDENT {
@@ -159,12 +162,17 @@ func (p *Parser) parseVarDeclaration() *ast.VarStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	p.advanceToken()
+
 	return stmt
 }
 
 // ---------------------------------
 // ----- Parsing expressions -------
 // ---------------------------------
+
+// First parse the prefix side of the expression (identifiers, numbers and unary operators),
+// then parse the infix part of the expression if exists
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 
@@ -172,11 +180,36 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	leftExpr := prefix()
+	exp := prefix()
 
-	// aca hacer el for y los infijos
+	for p.nextToken.Type != tokens.SEMICOLON && precedence < p.nextPrecendence() {
+		infix := p.infixParseFns[p.nextToken.Type]
 
-	return leftExpr
+		if infix == nil {
+			return exp
+		}
+
+		p.advanceToken()
+
+		// parse and create an infix expression adding the current prefix expression to it
+		exp = infix(exp)
+	}
+
+	return exp
+}
+
+// Parses prefix expressions (like -X or !X)
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	exp := &ast.PrefixExpression{
+		Token:    p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+
+	p.advanceToken()
+
+	exp.Right = p.parseExpression(PREFIX)
+
+	return exp
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
@@ -195,3 +228,19 @@ func (p *Parser) parseNumber() ast.Expression {
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression { return nil }
+
+func (p *Parser) parseInfixExpression(e ast.Expression) ast.Expression {
+	exp := &ast.InfixExpression{
+		Left:     e,
+		Operator: e.TokenLiteral(),
+		Token:    p.currentToken,
+	}
+
+	precedence := p.curPrecendence()
+
+	p.advanceToken()
+
+	exp.Right = p.parseExpression(precedence)
+
+	return exp
+}
