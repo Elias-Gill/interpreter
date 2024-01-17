@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/sl2.0/ast"
 	"github.com/sl2.0/lexer"
 	"github.com/sl2.0/tokens"
@@ -46,7 +48,7 @@ func NewParser(input string) *Parser {
 	parser.advanceToken()
 
 	parser.registerPrefix(tokens.IDENT, parser.parseIdentifier)
-    parser.registerPrefix(tokens.NUMBER, parser.parseNumber)
+	parser.registerPrefix(tokens.NUMBER, parser.parseNumber)
 
 	// register infix parsing functions
 
@@ -165,5 +167,12 @@ func (p *Parser) parseIdentifier() ast.Expression {
 }
 
 func (p *Parser) parseNumber() ast.Expression {
-    return ast.NewIdentifier(p.currentToken)
+	exp := ast.NewInteger(p.currentToken)
+
+	if exp == nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		p.errors = append(p.errors, msg)
+	}
+
+	return exp
 }

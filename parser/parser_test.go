@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/sl2.0/ast"
@@ -97,50 +98,99 @@ func TestReturn(t *testing.T) {
 		// try to convert to type VarStatement
 		_, ok := value.(*ast.ReturnStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
+			t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
+		}
+	}
+
+}
+
+func TestIntegerExpression(t *testing.T) {
+	tc := testCase{
+		input: `
+        4;
+        5;
+        12031;
+        `,
+		numStatms: 3,
+		expected:  []string{"4", "5", "12031"},
+	}
+
+	parser := NewParser(tc.input)
+	p := parser.ParseProgram()
+
+	// if the parsing stage has errors, the test will FailNow()
+	checkErrors(t, parser)
+
+	if p == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+
+	if len(p.Statements) != tc.numStatms {
+		t.Fatalf("Number of statements must be: %d\n Found: %d",
+			tc.numStatms, len(p.Statements),
+		)
+	}
+
+	for i, value := range p.Statements {
+		// try to convert to type VarStatement
+		exp, ok := value.(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			continue
+		}
+
+		number, ok := exp.Expression.(*ast.Integer)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.Integer")
+			continue
+		}
+
+		expect, _ := strconv.Atoi(tc.expected[i])
+		if int(number.Value) != expect {
+			t.Errorf("Expected value %v. \n\tGot %v", number.Value, expect)
 		}
 	}
 
 }
 
 func TestIdentifierExpression(t *testing.T) {
-    tc := testCase{
-        input: `
+	tc := testCase{
+		input: `
         persona;
         x;
         y;
         `,
-        numStatms: 3,
-    }
+		numStatms: 3,
+	}
 
-    parser := NewParser(tc.input)
-    p := parser.ParseProgram()
+	parser := NewParser(tc.input)
+	p := parser.ParseProgram()
 
-    // if the parsing stage has errors, the test will FailNow()
-    checkErrors(t, parser)
+	// if the parsing stage has errors, the test will FailNow()
+	checkErrors(t, parser)
 
-    if p == nil {
-        t.Fatalf("ParseProgram() returned nil")
-    }
+	if p == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
 
-    if len(p.Statements) != tc.numStatms {
-        t.Fatalf("Number of statements must be: %d\n Found: %d",
-            tc.numStatms, len(p.Statements),
-        )
-    }
+	if len(p.Statements) != tc.numStatms {
+		t.Fatalf("Number of statements must be: %d\n Found: %d",
+			tc.numStatms, len(p.Statements),
+		)
+	}
 
-    for _, value := range p.Statements {
-        // try to convert to type VarStatement
-        exp, ok := value.(*ast.ExpressionStatement)
-        if !ok {
-            t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
-        }
+	for _, value := range p.Statements {
+		// try to convert to type VarStatement
+		exp, ok := value.(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
+		}
 
-        _, ok = exp.Expression.(*ast.Identifier)
-        if !ok {
-            t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
-        }
-    }
+		_, ok = exp.Expression.(*ast.Identifier)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.VarStatement")
+		}
+	}
 
 }
 

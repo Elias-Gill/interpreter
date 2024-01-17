@@ -2,15 +2,16 @@ package ast
 
 import (
 	"bytes"
+	"strconv"
 
 	"github.com/sl2.0/tokens"
 )
 
 type Node interface {
-    // returns the token literal of the current token
+	// returns the token literal of the current token
 	TokenLiteral() string
 
-    // returns a string representation of the statements in the ast
+	// returns a string representation of the statements in the ast
 	ToString() string
 }
 
@@ -44,7 +45,6 @@ func (a *Ast) ToString() string {
 // EVERY "declaration" is an statement. Example: a variable declaration,
 // and if statement, a function declration.
 
-// --- variable declaration statement ---
 type VarStatement struct {
 	Ident *Identifier
 	Value Expression
@@ -71,7 +71,6 @@ func (v *VarStatement) ToString() string {
 	return out.String()
 }
 
-// --- return statement ---
 type ReturnStatement struct {
 	ReturnValue Expression
 	Token       tokens.Token
@@ -95,7 +94,6 @@ func (r *ReturnStatement) ToString() string {
 	return out.String()
 }
 
-// --- expression statement ---
 type ExpressionStatement struct {
 	Expression Expression
 	Token      tokens.Token
@@ -117,7 +115,6 @@ func (e *ExpressionStatement) ToString() string {
 // THE CONTENT of a statement is called expression. So a statement is a
 // TREE OF EXPRESSIONS.
 
-// the identifier is an expression
 type Identifier struct {
 	Value string
 	Token tokens.Token
@@ -135,4 +132,49 @@ func (i *Identifier) TokenLiteral() string {
 }
 func (i *Identifier) ToString() string {
 	return i.Value
+}
+
+type Integer struct {
+	Value int64
+	Token tokens.Token
+}
+
+func NewInteger(t tokens.Token) *Integer {
+	value, err := strconv.ParseInt(t.Literal, 0, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &Integer{
+		Value: value,
+		Token: t,
+	}
+}
+func (i *Integer) expressionNode() {}
+func (i *Integer) TokenLiteral() string {
+	return i.Token.Literal
+}
+func (i *Integer) ToString() string {
+	return i.TokenLiteral()
+}
+
+type PrefixExpression struct {
+	Right    Expression
+	Operator string
+	Token    tokens.Token
+}
+
+func (p *PrefixExpression) expressionNode() {}
+func (p *PrefixExpression) TokenLiteral() string {
+	return p.Token.Literal
+}
+func (p *PrefixExpression) ToString() string {
+	var out bytes.Buffer
+
+	out.WriteString(p.TokenLiteral() + " (")
+    out.WriteString(p.Operator)
+	out.WriteString(p.Right.ToString())
+	out.WriteString(") ")
+
+	return out.String()
 }
