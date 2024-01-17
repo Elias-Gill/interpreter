@@ -94,6 +94,10 @@ func (r *ReturnStatement) ToString() string {
 	return out.String()
 }
 
+/*
+An expression statement is a expression which is not assosiated to a variable
+declaration like: -(5+5)
+*/
 type ExpressionStatement struct {
 	Expression Expression
 	Token      tokens.Token
@@ -172,7 +176,7 @@ func (p *PrefixExpression) ToString() string {
 	var out bytes.Buffer
 
 	out.WriteString(p.TokenLiteral() + " (")
-    out.WriteString(p.Operator)
+	out.WriteString(p.Operator)
 	out.WriteString(p.Right.ToString())
 	out.WriteString(") ")
 

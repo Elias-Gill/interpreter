@@ -40,7 +40,7 @@ const (
 	ASIGN    = "ASIGN"  // =
 	EQUALS   = "EQUALS" // ==
 	NOTEQUAL = "NOTEQUAL"
-	STROKE   = "STROKE"
+	SLASH    = "STROKE"
 
 	// brackets and parenteses
 	LBRAC = "LBRAC"

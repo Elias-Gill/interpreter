@@ -37,7 +37,7 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.NOTEQUAL, Literal: "!="},
 				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.ASIGN, Literal: "="},
-				{Type: tokens.STROKE, Literal: "/"},
+				{Type: tokens.SLASH, Literal: "/"},
 				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.EOF, Literal: ""},
 			},

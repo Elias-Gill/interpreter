@@ -29,10 +29,22 @@ const (
 	EQUALS    // ==
 	GREATLESS // < >
 	SUM       // + -
-	MULT      // * /
+	PROD      // * /
 	PREFIX    // -X  !X
 	CALL      // foo(bar)
 )
+
+var precedences = map[string]int{
+	tokens.EQUALS:   EQUALS,
+	tokens.NOTEQUAL: EQUALS,
+	tokens.LT:       GREATLESS,
+	tokens.GT:       GREATLESS,
+	tokens.PLUS:     SUM,
+	tokens.ASTERISC: PROD,
+	tokens.SLASH:    PROD,
+	tokens.FUNCTION: CALL,
+	tokens.LPAR:     CALL,
+}
 
 func NewParser(input string) *Parser {
 	parser := &Parser{
@@ -49,6 +61,7 @@ func NewParser(input string) *Parser {
 
 	parser.registerPrefix(tokens.IDENT, parser.parseIdentifier)
 	parser.registerPrefix(tokens.NUMBER, parser.parseNumber)
+	parser.registerPrefix(tokens.LPAR, parser.parseGroupedExpression)
 
 	// register infix parsing functions
 
@@ -61,6 +74,7 @@ func (p *Parser) ParseProgram() *ast.Ast {
 
 	for p.currentToken.Type != tokens.EOF {
 		stmt := p.parseStatement()
+
 		if stmt != nil {
 			tree.Statements = append(tree.Statements, stmt)
 		}
@@ -71,6 +85,10 @@ func (p *Parser) ParseProgram() *ast.Ast {
 	return tree
 }
 
+// --------------------------------
+// ----- Parsing statements -------
+// --------------------------------
+
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case tokens.VAR:
@@ -78,7 +96,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case tokens.RETURN:
 		return p.parseReturn()
 	case tokens.LINEBREAK:
-		// TODO: ver que onda
+		// Do nothing for now (TODO)
 		return nil
 	default:
 		return p.parseExpressionStatement()
@@ -104,13 +122,12 @@ func (p *Parser) parseReturn() *ast.ReturnStatement {
 		Token: p.currentToken,
 	}
 
-	// TODO: parse expressions
-	for p.currentToken.Type != tokens.SEMICOLON {
+	p.advanceToken()
+
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	if p.nextToken.Type == tokens.SEMICOLON {
 		p.advanceToken()
-		if tokens.EOF == p.currentToken.Type {
-			p.newParserError(`Expected ";" in return statement`)
-			return nil
-		}
 	}
 
 	return stmt
@@ -119,35 +136,35 @@ func (p *Parser) parseReturn() *ast.ReturnStatement {
 func (p *Parser) parseVarDeclaration() *ast.VarStatement {
 	stmt := &ast.VarStatement{
 		Token: p.currentToken,
-		Value: nil,
 	}
 
 	// set the identifier
 	p.advanceToken()
+
 	if p.currentToken.Type != tokens.IDENT {
 		return nil
 	}
+
 	stmt.Ident = ast.NewIdentifier(p.currentToken)
 
 	// search for "="
 	p.advanceToken()
+
 	if p.currentToken.Type != tokens.ASIGN {
 		p.newParserError(`Expected "=" sign`)
 		return nil
 	}
 
-	// TODO: parse expressions
-	for p.currentToken.Type != tokens.SEMICOLON {
-		p.advanceToken()
-		// p.parseExpression()
-	}
+	p.advanceToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
 }
 
-// ------------------------------------------
-// ----- Parsing expression functions -------
-// ------------------------------------------
+// ---------------------------------
+// ----- Parsing expressions -------
+// ---------------------------------
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 
@@ -157,10 +174,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExpr := prefix()
 
+	// aca hacer el for y los infijos
+
 	return leftExpr
 }
-
-func (p *Parser) parseGroupedExpression() *ast.Expression { return nil }
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return ast.NewIdentifier(p.currentToken)
@@ -176,3 +193,5 @@ func (p *Parser) parseNumber() ast.Expression {
 
 	return exp
 }
+
+func (p *Parser) parseGroupedExpression() ast.Expression { return nil }
