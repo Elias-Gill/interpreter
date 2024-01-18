@@ -22,7 +22,8 @@ const (
 	// primitive data types
 	NUMBER = "NUMBER"
 	STRING = "STRING"
-	BOOL   = "BOOL"
+	TRUE   = "TRUE"
+	FALSE  = "FALSE"
 
 	// especial characters
 	COLON     = "COLON"
@@ -52,23 +53,23 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"func":   FUNCTION,
-	"var":    VAR,
-	"si":     IF,
-	"sino":   ELSE,
-	"desde":  FOR,
-	"return": RETURN,
+	"func":    FUNCTION,
+	"var":     VAR,
+	"si":      IF,
+	"sino":    ELSE,
+	"desde":   FOR,
+	"retorna": RETURN,
 
 	// datatype keywords
 	"entero": DATATYPE,
 	"cadena": DATATYPE,
-	"true":   BOOL,
-	"false":  BOOL,
+	"true":   TRUE,
+	"false":  FALSE,
 }
 
-func ResolveIdent(ident string) TokenType {
-	if ty, ok := keywords[ident]; ok {
-		return ty
+func ResolveType(ident string) TokenType {
+	if tType, ok := keywords[ident]; ok {
+		return tType
 	}
 
 	return IDENT

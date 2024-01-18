@@ -29,6 +29,7 @@ func (p *Parser) registerPrefixFn(t tokens.TokenType, f prefixFn) {
 	p.prefixParseFns[t] = f
 }
 
+// returns the precedence lvl of the current token
 func (p *Parser) curPrecendence() int {
 	value, ok := precedences[string(p.currentToken.Type)]
 	if !ok {
@@ -38,6 +39,7 @@ func (p *Parser) curPrecendence() int {
 	return value
 }
 
+// returns the precedence lvl of the next token
 func (p *Parser) nextPrecendence() int {
 	value, ok := precedences[string(p.nextToken.Type)]
 	if !ok {

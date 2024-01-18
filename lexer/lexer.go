@@ -83,7 +83,7 @@ func (l *Lexer) NexToken() tokens.Token {
 		if isLetter(l.ch) {
 			ident := l.extractIdentifier()
 			// early return to prevent reading (and skipping) the next char
-			return newMultiToken(tokens.ResolveIdent(ident), ident)
+			return newMultiToken(tokens.ResolveType(ident), ident)
 		}
 
 		if isNumber(l.ch) {

@@ -65,6 +65,8 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)
 	parser.registerPrefixFn(tokens.BANG, parser.parsePrefixExpression)
 	parser.registerPrefixFn(tokens.MINUS, parser.parsePrefixExpression)
+	parser.registerPrefixFn(tokens.TRUE, parser.parseBoolExpression)
+	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
 
 	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
 	// parser.registerInfix(tokens.LPAR, parser.parseCall)
@@ -241,6 +243,17 @@ func (p *Parser) parseInfixExpression(e ast.Expression) ast.Expression {
 	p.advanceToken()
 
 	exp.Right = p.parseExpression(precedence)
+
+	return exp
+}
+
+func (p *Parser) parseBoolExpression() ast.Expression {
+	exp := ast.NewBoolean(p.currentToken)
+
+	if exp == nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		p.errors = append(p.errors, msg)
+	}
 
 	return exp
 }

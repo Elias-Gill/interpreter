@@ -44,10 +44,10 @@ func TestNextToken(t *testing.T) {
 		},
 
 		{
-			`var nuevo: entero = 22;`,
+			`var numero_nuevo: entero = 22;`,
 			[]tokens.Token{
 				{Type: tokens.VAR, Literal: "var"},
-				{Type: tokens.IDENT, Literal: "nuevo"},
+				{Type: tokens.IDENT, Literal: "numero_nuevo"},
 				{Type: tokens.COLON, Literal: ":"},
 				{Type: tokens.DATATYPE, Literal: "entero"},
 				{Type: tokens.ASIGN, Literal: "="},
@@ -57,17 +57,17 @@ func TestNextToken(t *testing.T) {
 			},
 		},
 		{
-			`func nuevo(nombre: cadena): entero {
+			`func nuevo_parcial(nombre: cadena): entero {
                 var auxiliar: entero
                 si algo == true {
-                    return false
+                    retorna false
                 }
 
-                return nombre
+                retorna nombre
             }`,
 			[]tokens.Token{
 				{Type: tokens.FUNCTION, Literal: "func"},
-				{Type: tokens.IDENT, Literal: "nuevo"},
+				{Type: tokens.IDENT, Literal: "nuevo_parcial"},
 				{Type: tokens.LPAR, Literal: "("},
 				{Type: tokens.IDENT, Literal: "nombre"},
 				{Type: tokens.COLON, Literal: ":"},
@@ -89,19 +89,19 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.IF, Literal: "si"},
 				{Type: tokens.IDENT, Literal: "algo"},
 				{Type: tokens.EQUALS, Literal: "=="},
-				{Type: tokens.BOOL, Literal: "true"},
+				{Type: tokens.TRUE, Literal: "true"},
 				{Type: tokens.LBRAC, Literal: "{"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
 
-				{Type: tokens.RETURN, Literal: "return"},
-				{Type: tokens.BOOL, Literal: "false"},
+				{Type: tokens.RETURN, Literal: "retorna"},
+				{Type: tokens.FALSE, Literal: "false"},
 				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
 
-				{Type: tokens.RETURN, Literal: "return"},
+				{Type: tokens.RETURN, Literal: "retorna"},
 				{Type: tokens.IDENT, Literal: "nombre"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
