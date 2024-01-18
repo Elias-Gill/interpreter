@@ -31,18 +31,18 @@ func (p *Parser) registerPrefixFn(t tokens.TokenType, f prefixFn) {
 
 func (p *Parser) curPrecendence() int {
 	value, ok := precedences[string(p.currentToken.Type)]
-    if !ok {
-        return LOWEST
-    }
+	if !ok {
+		return LOWEST
+	}
 
 	return value
 }
 
 func (p *Parser) nextPrecendence() int {
-    value, ok := precedences[string(p.nextToken.Type)]
-    if !ok {
-        return LOWEST
-    }
+	value, ok := precedences[string(p.nextToken.Type)]
+	if !ok {
+		return LOWEST
+	}
 
-    return value
+	return value
 }

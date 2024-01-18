@@ -96,7 +96,7 @@ func (p *Parser) ParseProgram() *ast.Ast {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case tokens.VAR:
-		return p.parseVarDeclaration()
+		return p.parseVarStatement()
 	case tokens.RETURN:
 		return p.parseReturn()
 	case tokens.LINEBREAK:
@@ -137,7 +137,7 @@ func (p *Parser) parseReturn() *ast.ReturnStatement {
 	return stmt
 }
 
-func (p *Parser) parseVarDeclaration() *ast.VarStatement {
+func (p *Parser) parseVarStatement() *ast.VarStatement {
 	stmt := &ast.VarStatement{
 		Token: p.currentToken,
 	}
