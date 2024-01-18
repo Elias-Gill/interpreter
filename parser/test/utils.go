@@ -41,17 +41,17 @@ func generateProgram(t *testing.T, input string) *ast.Ast {
 		t.Fatalf("ParseProgram() returned nil")
 	}
 
-    if len(p.Statements) == 0 {
+	if len(p.Statements) == 0 {
 		t.Fatalf("Empty AST")
-    }
+	}
 
 	return p
 }
 
 func testLiteralExpression(t *testing.T, expression ast.Expression, expected interface{}) bool {
-    if expression == nil {
-        t.Errorf("Wtf bro, you submited a nil expression")
-    }
+	if expression == nil {
+		t.Errorf("Wtf bro, you submited a nil expression")
+	}
 
 	switch expected := expected.(type) {
 	case bool:
@@ -104,10 +104,10 @@ func testIdentifier(t *testing.T, exp ast.Expression, expected string) bool {
 		return false
 	}
 
-    if ident.Value != expected {
-        t.Errorf("Expected value %v. Got: %v", expected, ident.Value)
-        return false
-    }
+	if ident.Value != expected {
+		t.Errorf("Expected value %v. Got: %v", expected, ident.Value)
+		return false
+	}
 
 	return true
 }
