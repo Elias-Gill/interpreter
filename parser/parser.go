@@ -78,7 +78,7 @@ func (p *Parser) ParseProgram() *ast.Ast {
 	tree := &ast.Ast{}
 	tree.Statements = []ast.Statement{}
 
-	for p.currentToken.Type != tokens.EOF {
+	for !p.curTokenIs(tokens.EOF) {
 		stmt := p.parseStatement()
 
 		if stmt != nil {
@@ -116,7 +116,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	}
 
 	// to support expression with optional semicolon
-	if p.nextToken.Type == tokens.SEMICOLON {
+	if p.nextTokenIs(tokens.SEMICOLON) {
 		p.advanceToken()
 	}
 
@@ -144,22 +144,20 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		Token: p.currentToken,
 	}
 
-	p.advanceToken()
-
-	if p.currentToken.Type != tokens.IDENT {
+	if !p.expectNextToken(tokens.IDENT) {
 		return nil
 	}
+
+	p.advanceToken()
 
 	stmt.Ident = ast.NewIdentifier(p.currentToken)
 
-	// search for "="
-	p.advanceToken()
-
-	if p.currentToken.Type != tokens.ASIGN {
-		p.newParserError(`Expected "=" sign`)
+	if !p.expectNextToken(tokens.ASIGN) {
 		return nil
 	}
 
+	// step over "="
+	p.advanceToken()
 	p.advanceToken()
 
 	stmt.Value = p.parseExpression(LOWEST)
@@ -184,7 +182,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	exp := prefix()
 
-	for p.nextToken.Type != tokens.SEMICOLON && precedence < p.nextPrecendence() {
+	for !p.nextTokenIs(tokens.SEMICOLON) && precedence < p.nextPrecendence() {
 		infix := p.infixParseFns[p.nextToken.Type]
 
 		if infix == nil {

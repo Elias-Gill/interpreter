@@ -11,12 +11,6 @@ func (p *Parser) advanceToken() {
 	p.nextToken = p.lexer.NexToken()
 }
 
-// Generates a new parser error with the current token
-func (p *Parser) newParserError(msg string) {
-	err := fmt.Sprintf("Parse error: %s \n Token: %s", msg, p.currentToken.Type)
-	p.errors = append(p.errors, err)
-}
-
 func (p *Parser) Errors() []string {
 	return p.errors
 }
@@ -47,4 +41,34 @@ func (p *Parser) nextPrecendence() int {
 	}
 
 	return value
+}
+
+func (p *Parser) expectNextToken(expTy tokens.TokenType) bool {
+	if p.nextToken.Type == expTy {
+		return true
+	}
+
+	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.currentToken.Literal)
+	p.errors = append(p.errors, msg)
+
+	return false
+}
+
+func (p *Parser) expectCurToken(expTy tokens.TokenType) bool {
+	if p.currentToken.Type == expTy {
+		return true
+	}
+
+	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.currentToken.Literal)
+	p.errors = append(p.errors, msg)
+
+	return false
+}
+
+func (p *Parser) curTokenIs(expTy tokens.TokenType) bool {
+	return p.currentToken.Type == expTy
+}
+
+func (p *Parser) nextTokenIs(expTy tokens.TokenType) bool {
+	return p.nextToken.Type == expTy
 }
