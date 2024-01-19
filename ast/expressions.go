@@ -66,10 +66,10 @@ func (p *PrefixExpression) TokenLiteral() string {
 func (p *PrefixExpression) ToString() string {
 	var out bytes.Buffer
 
-	out.WriteString(p.TokenLiteral() + " (")
+	out.WriteString(p.TokenLiteral() + "(")
 	out.WriteString(p.Operator)
 	out.WriteString(p.Right.ToString())
-	out.WriteString(") ")
+	out.WriteString(")")
 
 	return out.String()
 }

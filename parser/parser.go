@@ -69,6 +69,9 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
 
 	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.ASTERISC, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.SLASH, parser.parseInfixExpression)
 	// parser.registerInfix(tokens.LPAR, parser.parseCall)
 
 	return parser
@@ -100,7 +103,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case tokens.VAR:
 		return p.parseVarStatement()
 	case tokens.RETURN:
-		return p.parseReturn()
+		return p.parseReturnStatement()
 	case tokens.LINEBREAK:
 		// Do nothing for now (TODO:)
 		return nil
@@ -123,7 +126,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
-func (p *Parser) parseReturn() *ast.ReturnStatement {
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{
 		Token: p.currentToken,
 	}
@@ -144,20 +147,17 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		Token: p.currentToken,
 	}
 
-	if !p.expectNextToken(tokens.IDENT) {
+	if !p.advanceIfNextToken(tokens.IDENT) {
 		return nil
 	}
 
-	p.advanceToken()
-
 	stmt.Ident = ast.NewIdentifier(p.currentToken)
 
-	if !p.expectNextToken(tokens.ASIGN) {
+	if !p.advanceIfNextToken(tokens.ASIGN) {
 		return nil
 	}
 
 	// step over "="
-	p.advanceToken()
 	p.advanceToken()
 
 	stmt.Value = p.parseExpression(LOWEST)
@@ -232,7 +232,7 @@ func (p *Parser) parseGroupedExpression() ast.Expression { return nil }
 func (p *Parser) parseInfixExpression(e ast.Expression) ast.Expression {
 	exp := &ast.InfixExpression{
 		Left:     e,
-		Operator: e.TokenLiteral(),
+		Operator: p.currentToken.Literal,
 		Token:    p.currentToken,
 	}
 
