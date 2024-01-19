@@ -78,3 +78,24 @@ func (e *ExpressionStatement) ToString() string {
 
 	return ""
 }
+
+type BlockStatement struct {
+    Statements []Statement
+    Token      tokens.Token // the "{" token
+}
+
+func (b *BlockStatement) statementNode() {}
+func (b *BlockStatement) TokenLiteral() string {
+    return b.Token.Literal
+}
+func (b *BlockStatement) ToString() string {
+    var buffer bytes.Buffer
+
+    buffer.WriteString("{")
+    for _, stmt := range b.Statements {
+        buffer.WriteString(stmt.ToString())
+    }
+    buffer.WriteString("}")
+
+    return buffer.String()
+}
