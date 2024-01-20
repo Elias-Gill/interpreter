@@ -46,18 +46,7 @@ func TestVarStatement(t *testing.T) {
 			continue
 		}
 
-		v, ok := p.Statements[0].(*ast.VarStatement)
-		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
-			continue
-		}
-
-		if v.Ident.Value != tc.identifier {
-			t.Errorf("Expected value %s. Got: %s", tc.input, v.Ident.Value)
-			continue
-		}
-
-		testLiteralExpression(t, v.Value, tc.expectedValue)
+		testVar(t, p.Statements[0], tc.identifier, tc.expectedValue)
 	}
 }
 
@@ -213,6 +202,7 @@ func TestPrefixExpression(t *testing.T) {
 		}
 	}
 }
+
 func TestInfixExpression(t *testing.T) {
 	tesCases := []struct {
 		expectedValue string
@@ -237,7 +227,6 @@ func TestInfixExpression(t *testing.T) {
 	}
 
 	for _, tc := range tesCases {
-
 		p := generateProgram(t, tc.input)
 
 		if p == nil {
@@ -252,13 +241,10 @@ func TestInfixExpression(t *testing.T) {
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
 			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
-			continue
+			return
 		}
 
-		if tc.expectedValue != exp.ToString() {
-			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
-			continue
-		}
+		testInfix(t, exp.Expression, tc.expectedValue)
 	}
 }
 
@@ -271,10 +257,10 @@ func TestOperatorPrecedence(t *testing.T) {
 			input:         ` 2+-3; `,
 			expectedValue: "(2+(-3))",
 		},
-        {
-            input:         ` -2+-3; `,
-            expectedValue: "((-2)+(-3))",
-        },
+		{
+			input:         ` -2+-3; `,
+			expectedValue: "((-2)+(-3))",
+		},
 		{
 			input:         ` -2 > 5 + 4*nada == 33; `,
 			expectedValue: "(((-2)>(5+(4*nada)))==33)",
@@ -306,5 +292,51 @@ func TestOperatorPrecedence(t *testing.T) {
 		}
 	}
 }
+
+func TestIfExpression(t *testing.T) {
+	input := `si (numero > 33) {
+    var nuevo = 33;
+    } sino { var nuevo = true; }`
+
+	p := generateProgram(t, input)
+
+	if len(p.Statements) != 1 {
+		t.Fatalf("Number of statements found: %d", len(p.Statements))
+	}
+
+    if p.Statements[0].TokenLiteral() != "si" {
+        t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
+    }
+
+	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+	}
+
+	v, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("Parser error\n \tCannot convert statement to ast.IfExpression")
+	}
+
+	testInfix(t, v.Condition, "(numero>33)")
+
+    if v.Consequence == nil {
+        t.Fatalf("Empty consecuence")
+    }
+
+	testVar(t, v.Consequence.Statements[0], "nuevo", 33)
+
+    if v.Alternative == nil {
+        t.Fatalf("Empty alternative")
+    }
+
+    testVar(t, v.Alternative.Statements[0], "nuevo", true)
+}
+
+func TestFuncStatement(t *testing.T) {
+	// TODO:
+}
+
+func TestFuncExpression(t *testing.T) {
 	// TODO:
 }

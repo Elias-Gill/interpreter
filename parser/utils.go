@@ -66,10 +66,33 @@ func (p *Parser) expectCurToken(expTy tokens.TokenType) bool {
 	return false
 }
 
+func (p *Parser) expectNextToken(expTy tokens.TokenType) bool {
+    if p.nextToken.Type == expTy {
+        return true
+    }
+
+    msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
+    p.errors = append(p.errors, msg)
+
+    return false
+}
+
 // Advances to the next token if equals the given token type. Generates a parsing error if 
 // false.
 func (p *Parser) advanceIfNextToken(expTy tokens.TokenType) bool {
     if p.nextToken.Type == expTy {
+        p.advanceToken()
+        return true
+    }
+
+    msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
+    p.errors = append(p.errors, msg)
+
+    return false
+}
+
+func (p *Parser) advanceIfCurToken(expTy tokens.TokenType) bool {
+    if p.currentToken.Type == expTy {
         p.advanceToken()
         return true
     }

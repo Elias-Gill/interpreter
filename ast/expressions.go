@@ -118,3 +118,34 @@ func (b *Boolean) TokenLiteral() string {
 func (b *Boolean) ToString() string {
 	return b.TokenLiteral()
 }
+
+type IfExpression struct {
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+	Token       tokens.Token
+}
+
+func NewIfExpression(t tokens.Token) *IfExpression {
+	return &IfExpression{
+		Token: t,
+	}
+}
+
+func (i *IfExpression) expressionNode() {}
+func (i *IfExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+func (i *IfExpression) ToString() string {
+    var buffer bytes.Buffer
+
+    buffer.WriteString(i.TokenLiteral())
+    buffer.WriteString(i.Condition.ToString())
+    buffer.WriteString(i.Consequence.ToString())
+
+    if i.Alternative != nil {
+        buffer.WriteString("sino" + i.Alternative.ToString())
+    }
+
+	return buffer.String()
+}

@@ -67,15 +67,16 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.MINUS, parser.parsePrefixExpression)
 	parser.registerPrefixFn(tokens.TRUE, parser.parseBoolExpression)
 	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
+	parser.registerPrefixFn(tokens.IF, parser.parseIfExpression)
 
-    parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.SLASH, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.ASTERISC, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.GT, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.LT, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.EQUALS, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.NOTEQUAL, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.SLASH, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.ASTERISC, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.GT, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.LT, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.EQUALS, parser.parseInfixExpression)
+	parser.registerInfixFn(tokens.NOTEQUAL, parser.parseInfixExpression)
 	// parser.registerInfix(tokens.LPAR, parser.parseCall)
 
 	return parser
@@ -108,6 +109,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVarStatement()
 	case tokens.RETURN:
 		return p.parseReturnStatement()
+	case tokens.FUNCTION:
+		return p.parseFunctionStatement()
 	case tokens.LINEBREAK:
 		// Do nothing for now (TODO:)
 		return nil
@@ -118,9 +121,15 @@ func (p *Parser) parseStatement() ast.Statement {
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{
-		Token:      p.currentToken,
-		Expression: p.parseExpression(LOWEST),
+		Token: p.currentToken,
 	}
+
+	exp := p.parseExpression(LOWEST)
+	if exp == nil {
+		return nil
+	}
+
+	stmt.Expression = exp
 
 	// to support expression with optional semicolon
 	if p.nextTokenIs(tokens.SEMICOLON) {
@@ -171,6 +180,31 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 	return stmt
 }
 
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	tree := &ast.BlockStatement{}
+	tree.Statements = []ast.Statement{}
+
+    // jump '{'
+    p.advanceToken()
+
+	for !p.curTokenIs(tokens.EOF) && !p.curTokenIs(tokens.RBRAC) {
+		stmt := p.parseStatement()
+
+		if stmt != nil {
+			tree.Statements = append(tree.Statements, stmt)
+		}
+
+        p.advanceToken()
+	}
+
+	return tree
+}
+
+func (p *Parser) parseFunctionStatement() *ast.ExpressionStatement {
+	// TODO:
+	return nil
+}
+
 // ---------------------------------
 // ----- Parsing expressions -------
 // ---------------------------------
@@ -181,6 +215,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 
 	if prefix == nil {
+        p.errors = append(p.errors, "Not prefixFn found for: " + p.currentToken.Literal)
 		return nil
 	}
 
@@ -258,4 +293,65 @@ func (p *Parser) parseBoolExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	exp := ast.NewIfExpression(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.LPAR) {
+        p.errors = append(p.errors, "Missing '(' after if expression")
+		return nil
+	}
+
+	p.advanceToken()
+
+	condition := p.parseExpression(LOWEST)
+
+	if condition == nil {
+		return nil
+	}
+
+	exp.Condition = condition
+
+	if !p.advanceIfNextToken(tokens.RPAR) {
+        p.errors = append(p.errors, "Missing ')' on if expression")
+		return nil
+	}
+
+	if !p.advanceIfNextToken(tokens.LBRAC) {
+        p.errors = append(p.errors, "Missing '{' on if expression")
+		return nil
+	}
+
+	exp.Consequence = p.parseBlockStatement()
+
+	if !p.expectCurToken(tokens.RBRAC) {
+        p.errors = append(p.errors, "Missing closing '}' on if")
+		return nil
+	}
+
+	// if not "else" block, return
+	if !p.nextTokenIs(tokens.ELSE) {
+		return exp
+	}
+
+	p.advanceToken()
+
+	if !p.advanceIfNextToken(tokens.LBRAC) {
+		return nil
+	}
+
+	exp.Alternative = p.parseBlockStatement()
+
+	if !p.expectCurToken(tokens.RBRAC) {
+        p.errors = append(p.errors, "Missing closing '}' on else")
+		return nil
+	}
+
+	return exp
+}
+
+func (p *Parser) parseFunctionExpression() ast.Expression {
+	// TODO:
+	return nil
 }

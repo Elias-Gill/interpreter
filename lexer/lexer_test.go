@@ -61,7 +61,7 @@ func TestNextToken(t *testing.T) {
                 var auxiliar: entero
                 si algo == true {
                     retorna false
-                }
+                } sino {}
 
                 retorna nombre
             }`,
@@ -98,6 +98,10 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.FALSE, Literal: "false"},
 				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
+
+                {Type: tokens.ELSE, Literal: "sino"},
+                {Type: tokens.LBRAC, Literal: "{"},
+                {Type: tokens.RBRAC, Literal: "}"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
 

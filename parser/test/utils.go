@@ -111,3 +111,31 @@ func testIdentifier(t *testing.T, exp ast.Expression, expected string) bool {
 
 	return true
 }
+
+func testInfix(t *testing.T, exp ast.Expression, expected string) {
+	if expected != exp.ToString() {
+		t.Errorf("Expected: %s. Got: %s", expected, exp.ToString())
+		return
+	}
+}
+
+func testVar(t *testing.T, exp ast.Statement, identifier string, value interface{}) {
+
+    if exp.TokenLiteral() != "var" {
+        t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
+        return
+    }
+
+	v, ok := exp.(*ast.VarStatement)
+	if !ok {
+        t.Errorf("Expected 'var'. Got: %s", exp.ToString())
+		return
+	}
+
+	if v.Ident.Value != identifier {
+		t.Errorf("Expected value %s. Got: %s", identifier, v.Ident.Value)
+		return
+	}
+
+	testLiteralExpression(t, v.Value, value)
+}
