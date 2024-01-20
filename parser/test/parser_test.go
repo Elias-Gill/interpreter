@@ -169,6 +169,50 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 }
 
+func TestPrefixExpression(t *testing.T) {
+	tesCases := []struct {
+		expectedValue string
+		input         string
+	}{
+		{
+			input:         ` -3; `,
+			expectedValue: "(-3)",
+		},
+		{
+			input:         ` -noviembre; `,
+			expectedValue: "(-noviembre)",
+		},
+		{
+			input:         ` !noviembre; `,
+			expectedValue: "(!noviembre)",
+		},
+	}
+
+	for _, tc := range tesCases {
+
+		p := generateProgram(t, tc.input)
+
+		if p == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
+
+		if len(p.Statements) != 1 {
+			t.Errorf("Number of statements found: %d", len(p.Statements))
+		}
+
+		// try to convert to type expression statement
+		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			continue
+		}
+
+		if tc.expectedValue != exp.ToString() {
+			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
+			continue
+		}
+	}
+}
 func TestInfixExpression(t *testing.T) {
 	tesCases := []struct {
 		expectedValue string
@@ -178,18 +222,18 @@ func TestInfixExpression(t *testing.T) {
 			input:         ` 2+3; `,
 			expectedValue: "(2+3)",
 		},
-        {
+		{
 			input:         ` 21231 * nada; `,
 			expectedValue: "(21231*nada)",
-        },
-        {
-            input:         ` 21231 / nada; `,
-            expectedValue: "(21231/nada)",
-        },
-        {
-            input:         ` 21231 - nada; `,
-            expectedValue: "(21231-nada)",
-        },
+		},
+		{
+			input:         ` 21231 / nada; `,
+			expectedValue: "(21231/nada)",
+		},
+		{
+			input:         ` 21231 - nada; `,
+			expectedValue: "(21231-nada)",
+		},
 	}
 
 	for _, tc := range tesCases {
@@ -211,11 +255,55 @@ func TestInfixExpression(t *testing.T) {
 			continue
 		}
 
-        t.Logf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
-        if tc.expectedValue != exp.ToString() {
-            t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
-            continue
-        }
+		if tc.expectedValue != exp.ToString() {
+			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
+			continue
+		}
+	}
+}
+
+func TestOperatorPrecedence(t *testing.T) {
+	tesCases := []struct {
+		expectedValue string
+		input         string
+	}{
+		{
+			input:         ` 2+-3; `,
+			expectedValue: "(2+(-3))",
+		},
+        {
+            input:         ` -2+-3; `,
+            expectedValue: "((-2)+(-3))",
+        },
+		{
+			input:         ` -2 > 5 + 4*nada == 33; `,
+			expectedValue: "(((-2)>(5+(4*nada)))==33)",
+		},
+	}
+
+	for _, tc := range tesCases {
+
+		p := generateProgram(t, tc.input)
+
+		if p == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
+
+		if len(p.Statements) != 1 {
+			t.Errorf("Number of statements found: %d", len(p.Statements))
+		}
+
+		// try to convert to type Identifier
+		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			continue
+		}
+
+		if tc.expectedValue != exp.ToString() {
+			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
+			continue
+		}
 	}
 }
 	// TODO:

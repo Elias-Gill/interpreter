@@ -68,10 +68,14 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.TRUE, parser.parseBoolExpression)
 	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
 
-	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
-    parser.registerInfixFn(tokens.ASTERISC, parser.parseInfixExpression)
     parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
     parser.registerInfixFn(tokens.SLASH, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.ASTERISC, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.GT, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.LT, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.EQUALS, parser.parseInfixExpression)
+    parser.registerInfixFn(tokens.NOTEQUAL, parser.parseInfixExpression)
 	// parser.registerInfix(tokens.LPAR, parser.parseCall)
 
 	return parser
