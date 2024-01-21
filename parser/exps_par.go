@@ -142,6 +142,25 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseFunctionExpression() ast.Expression {
-	// TODO:
-	return nil
+	f := ast.NewFunctionLiteral(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.LPAR) {
+		return nil
+	}
+
+	params := p.parseFuncParameters()
+	if params == nil {
+		return nil
+	}
+
+	f.Paramenters = params
+
+	body := p.parseBlockStatement()
+	if body == nil {
+		return nil
+	}
+
+	f.Body = body
+
+	return f
 }

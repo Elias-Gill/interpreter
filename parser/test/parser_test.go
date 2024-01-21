@@ -347,7 +347,7 @@ func TestFuncStatement(t *testing.T) {
 	}
 
 	if p.Statements[0].TokenLiteral() != "func" {
-		t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
+		t.Fatalf("Expected 'func'. Got: %v", p.Statements[0].TokenLiteral())
 	}
 
 	stmt, ok := p.Statements[0].(*ast.FunctionStatement)
@@ -357,13 +357,13 @@ func TestFuncStatement(t *testing.T) {
 
 	testIdentifier(t, stmt.Identifier, "funcion_nueva")
 
-    if len(stmt.Paramenters) != 2 {
-        t.Fatalf("Expected 2 parameters. Got %v", len(stmt.Paramenters))
-    }
+	if len(stmt.Paramenters) != 2 {
+		t.Fatalf("Expected 2 parameters. Got %v", len(stmt.Paramenters))
+	}
 
 	for i, v := range stmt.Paramenters {
 		if v.Value != param_list[i] {
-			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", stmt.Identifier.Value)
+			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", v.Value)
 		}
 	}
 
@@ -375,5 +375,45 @@ func TestFuncStatement(t *testing.T) {
 }
 
 func TestFuncExpression(t *testing.T) {
-	// TODO:
+	input := `var f = func(x, y) {
+    var nuevo = 33;
+    }`
+	param_list := []string{"x", "y"}
+
+	p := generateProgram(t, input)
+
+	if len(p.Statements) != 1 {
+		t.Fatalf("Number of statements found: %d", len(p.Statements))
+	}
+
+	if p.Statements[0].TokenLiteral() != "var" {
+		t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
+	}
+
+	stmt, ok := p.Statements[0].(*ast.VarStatement)
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.VarStatement")
+	}
+
+    exp, ok := stmt.Value.(*ast.FunctionLiteral)
+    if !ok {
+        t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
+    }
+
+
+	if len(exp.Paramenters) != 2 {
+		t.Fatalf("Expected 2 parameters. Got %v", len(exp.Paramenters))
+	}
+
+	for i, v := range exp.Paramenters {
+		if v.Value != param_list[i] {
+			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", v.Value)
+		}
+	}
+
+	if exp.Body == nil {
+		t.Fatalf("Empty function body")
+	}
+
+	testVar(t, exp.Body.Statements[0], "nuevo", 33)
 }
