@@ -10,104 +10,157 @@ import (
 // --------------------------------
 
 func (p *Parser) parseStatement() ast.Statement {
-    switch p.currentToken.Type {
-    case tokens.VAR:
-        return p.parseVarStatement()
-    case tokens.RETURN:
-        return p.parseReturnStatement()
-    case tokens.FUNCTION:
-        return p.parseFunctionStatement()
-    case tokens.LINEBREAK:
-        // Do nothing for now (TODO:)
-        return nil
-    default:
-        return p.parseExpressionStatement()
-    }
+	switch p.currentToken.Type {
+	case tokens.VAR:
+		return p.parseVarStatement()
+	case tokens.RETURN:
+		return p.parseReturnStatement()
+	case tokens.FUNCTION:
+		return p.parseFunctionStatement()
+	case tokens.LINEBREAK:
+		// Do nothing for now (TODO:)
+		return nil
+	default:
+		return p.parseExpressionStatement()
+	}
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-    stmt := &ast.ExpressionStatement{
-        Token: p.currentToken,
-    }
+	stmt := &ast.ExpressionStatement{
+		Token: p.currentToken,
+	}
 
-    exp := p.parseExpression(LOWEST)
-    if exp == nil {
-        return nil
-    }
+	exp := p.parseExpression(LOWEST)
+	if exp == nil {
+		return nil
+	}
 
-    stmt.Expression = exp
+	stmt.Expression = exp
 
-    // to support expression with optional semicolon
-    if p.nextTokenIs(tokens.SEMICOLON) {
-        p.advanceToken()
-    }
+	// to support expression with optional semicolon
+	if p.nextTokenIs(tokens.SEMICOLON) {
+		p.advanceToken()
+	}
 
-    return stmt
+	return stmt
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
-    stmt := &ast.ReturnStatement{
-        Token: p.currentToken,
-    }
+	stmt := &ast.ReturnStatement{
+		Token: p.currentToken,
+	}
 
-    p.advanceToken()
+	p.advanceToken()
 
-    stmt.ReturnValue = p.parseExpression(LOWEST)
+	stmt.ReturnValue = p.parseExpression(LOWEST)
 
-    if p.nextToken.Type == tokens.SEMICOLON {
-        p.advanceToken()
-    }
+	if p.nextToken.Type == tokens.SEMICOLON {
+		p.advanceToken()
+	}
 
-    return stmt
+	return stmt
 }
 
 func (p *Parser) parseVarStatement() *ast.VarStatement {
-    stmt := &ast.VarStatement{
-        Token: p.currentToken,
-    }
+	stmt := &ast.VarStatement{
+		Token: p.currentToken,
+	}
 
-    if !p.advanceIfNextToken(tokens.IDENT) {
-        return nil
-    }
+	if !p.advanceIfNextToken(tokens.IDENT) {
+		return nil
+	}
 
-    stmt.Ident = ast.NewIdentifier(p.currentToken)
+	stmt.Ident = ast.NewIdentifier(p.currentToken)
 
-    if !p.advanceIfNextToken(tokens.ASIGN) {
-        return nil
-    }
+	if !p.advanceIfNextToken(tokens.ASIGN) {
+		return nil
+	}
 
-    // step over "="
-    p.advanceToken()
+	// step over "="
+	p.advanceToken()
 
-    stmt.Value = p.parseExpression(LOWEST)
+	stmt.Value = p.parseExpression(LOWEST)
 
-    p.advanceToken()
+	p.advanceToken()
 
-    return stmt
+	return stmt
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
-    tree := &ast.BlockStatement{}
-    tree.Statements = []ast.Statement{}
+	tree := &ast.BlockStatement{}
+	tree.Statements = []ast.Statement{}
 
-    // jump '{'
-    p.advanceToken()
-
-    for !p.curTokenIs(tokens.EOF) && !p.curTokenIs(tokens.RBRAC) {
-        stmt := p.parseStatement()
-
-        if stmt != nil {
-            tree.Statements = append(tree.Statements, stmt)
-        }
-
-        p.advanceToken()
+	if !p.advanceIfCurToken(tokens.LBRAC) {
+        return nil
     }
 
-    return tree
+	for !p.curTokenIs(tokens.EOF) && !p.curTokenIs(tokens.RBRAC) {
+		stmt := p.parseStatement()
+
+		if stmt != nil {
+			tree.Statements = append(tree.Statements, stmt)
+		}
+
+		p.advanceToken()
+	}
+
+	if !p.advanceIfCurToken(tokens.RBRAC) {
+        return nil
+	}
+
+	return tree
 }
 
-func (p *Parser) parseFunctionStatement() *ast.ExpressionStatement {
-    // TODO:
-    return nil
+func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
+	f := ast.NewFunctionStatement(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.IDENT) {
+		return nil
+	}
+
+	f.Identifier = ast.NewIdentifier(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.LPAR) {
+		return nil
+	}
+
+	params := p.parseFuncParameters()
+	if params == nil {
+		return nil
+	}
+
+	f.Paramenters = params
+
+	body := p.parseBlockStatement()
+	if body == nil {
+		return nil
+	}
+
+	f.Body = body
+
+	return f
 }
 
+func (p *Parser) parseFuncParameters() []*ast.Identifier {
+	var params []*ast.Identifier
+
+    // jump "("
+    p.advanceToken()
+
+	for !p.curTokenIs(tokens.RPAR) {
+		ident := ast.NewIdentifier(p.currentToken)
+		params = append(params, ident)
+
+		p.advanceToken()
+
+		if p.curTokenIs(tokens.COMMA) {
+			p.advanceToken()
+		}
+	}
+
+	if !p.advanceIfCurToken(tokens.RPAR) {
+		return nil
+	}
+
+	return params
+}

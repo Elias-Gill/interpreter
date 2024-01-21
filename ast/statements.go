@@ -80,22 +80,57 @@ func (e *ExpressionStatement) ToString() string {
 }
 
 type BlockStatement struct {
-    Statements []Statement
-    Token      tokens.Token // the "{" token
+	Statements []Statement
+	Token      tokens.Token // the "{" token
 }
 
 func (b *BlockStatement) statementNode() {}
 func (b *BlockStatement) TokenLiteral() string {
-    return b.Token.Literal
+	return b.Token.Literal
 }
 func (b *BlockStatement) ToString() string {
-    var buffer bytes.Buffer
+	var buffer bytes.Buffer
 
-    buffer.WriteString("{")
-    for _, stmt := range b.Statements {
-        buffer.WriteString(stmt.ToString())
-    }
-    buffer.WriteString("}")
+	buffer.WriteString("{")
+	for _, stmt := range b.Statements {
+		buffer.WriteString(stmt.ToString())
+	}
+	buffer.WriteString("}")
 
-    return buffer.String()
+	return buffer.String()
+}
+
+// Named functions
+type FunctionStatement struct {
+	Paramenters []*Identifier
+	Body        *BlockStatement
+	Identifier  *Identifier
+	Token       tokens.Token
+}
+
+func NewFunctionStatement(t tokens.Token) *FunctionStatement {
+	return &FunctionStatement{
+		Token: t,
+	}
+}
+
+func (f *FunctionStatement) statementNode() {}
+func (f *FunctionStatement) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionStatement) ToString() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(f.TokenLiteral())
+	buffer.WriteString(f.Identifier.ToString())
+	buffer.WriteString(" (")
+
+	for _, v := range f.Paramenters {
+		buffer.WriteString(v.ToString() + ", ")
+	}
+
+	buffer.WriteString(")")
+    buffer.WriteString(f.Body.ToString())
+    
+	return buffer.String()
 }

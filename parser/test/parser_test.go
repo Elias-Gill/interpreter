@@ -42,7 +42,7 @@ func TestVarStatement(t *testing.T) {
 		}
 
 		if p.Statements[0].TokenLiteral() != "var" {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
+			t.Errorf("Cannot convert statement to ast.ReturnStatement")
 			continue
 		}
 
@@ -76,14 +76,14 @@ func TestReturn(t *testing.T) {
 		stmt := p.Statements[0]
 
 		if stmt.TokenLiteral() != "retorna" {
-			t.Errorf("Parser error\n \tExpected return statement\n\tGot: %v",
+			t.Errorf("Expected return statement\n\tGot: %v",
 				stmt.TokenLiteral())
 			continue
 		}
 
 		ret, ok := stmt.(*ast.ReturnStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
+			t.Errorf("Cannot convert statement to ast.ReturnStatement")
 		}
 
 		testLiteralExpression(t, ret.ReturnValue, tc.expectedValue)
@@ -116,7 +116,7 @@ func TestIntegerExpression(t *testing.T) {
 
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
 			continue
 		}
 
@@ -150,7 +150,7 @@ func TestIdentifierExpression(t *testing.T) {
 		// try to convert to type Identifier
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
 			continue
 		}
 
@@ -192,7 +192,7 @@ func TestPrefixExpression(t *testing.T) {
 		// try to convert to type expression statement
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
 			continue
 		}
 
@@ -240,7 +240,7 @@ func TestInfixExpression(t *testing.T) {
 		// try to convert to type Identifier
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
 			return
 		}
 
@@ -282,7 +282,7 @@ func TestOperatorPrecedence(t *testing.T) {
 		// try to convert to type Identifier
 		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Errorf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
 			continue
 		}
 
@@ -304,37 +304,74 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("Number of statements found: %d", len(p.Statements))
 	}
 
-    if p.Statements[0].TokenLiteral() != "si" {
-        t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
-    }
+	if p.Statements[0].TokenLiteral() != "si" {
+		t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
+	}
 
 	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("Parser error\n \tCannot convert statement to ast.ExpressionStatement")
+		t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
 	}
 
 	v, ok := stmt.Expression.(*ast.IfExpression)
 	if !ok {
-		t.Fatalf("Parser error\n \tCannot convert statement to ast.IfExpression")
+		t.Fatalf("Cannot convert statement to ast.IfExpression")
 	}
 
 	testInfix(t, v.Condition, "(numero>33)")
 
-    if v.Consequence == nil {
-        t.Fatalf("Empty consecuence")
-    }
+	if v.Consequence == nil {
+		t.Fatalf("Empty consecuence")
+	}
 
 	testVar(t, v.Consequence.Statements[0], "nuevo", 33)
 
-    if v.Alternative == nil {
-        t.Fatalf("Empty alternative")
-    }
+	if v.Alternative == nil {
+		t.Fatalf("Empty alternative")
+	}
 
-    testVar(t, v.Alternative.Statements[0], "nuevo", true)
+	testVar(t, v.Alternative.Statements[0], "nuevo", true)
 }
 
+// Named functions
 func TestFuncStatement(t *testing.T) {
-	// TODO:
+	input := `func funcion_nueva(x, y) {
+    var nuevo = 33;
+    }`
+	param_list := []string{"x", "y"}
+
+	p := generateProgram(t, input)
+
+	if len(p.Statements) != 1 {
+		t.Fatalf("Number of statements found: %d", len(p.Statements))
+	}
+
+	if p.Statements[0].TokenLiteral() != "func" {
+		t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
+	}
+
+	stmt, ok := p.Statements[0].(*ast.FunctionStatement)
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.FunctionStatement")
+	}
+
+	testIdentifier(t, stmt.Identifier, "funcion_nueva")
+
+    if len(stmt.Paramenters) != 2 {
+        t.Fatalf("Expected 2 parameters. Got %v", len(stmt.Paramenters))
+    }
+
+	for i, v := range stmt.Paramenters {
+		if v.Value != param_list[i] {
+			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", stmt.Identifier.Value)
+		}
+	}
+
+	if stmt.Body == nil {
+		t.Fatalf("Empty function body")
+	}
+
+	testVar(t, stmt.Body.Statements[0], "nuevo", 33)
 }
 
 func TestFuncExpression(t *testing.T) {

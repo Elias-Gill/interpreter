@@ -137,15 +137,48 @@ func (i *IfExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
 func (i *IfExpression) ToString() string {
-    var buffer bytes.Buffer
+	var buffer bytes.Buffer
 
-    buffer.WriteString(i.TokenLiteral())
-    buffer.WriteString(i.Condition.ToString())
-    buffer.WriteString(i.Consequence.ToString())
+	buffer.WriteString(i.TokenLiteral())
+	buffer.WriteString(i.Condition.ToString())
+	buffer.WriteString(i.Consequence.ToString())
 
-    if i.Alternative != nil {
-        buffer.WriteString("sino" + i.Alternative.ToString())
-    }
+	if i.Alternative != nil {
+		buffer.WriteString("sino" + i.Alternative.ToString())
+	}
+
+	return buffer.String()
+}
+
+// Unnamed functions
+type FunctionLiteral struct {
+	Paramenters []*Identifier
+	Body        *BlockStatement
+	Token       tokens.Token
+}
+
+func NewFunctionLiteral(t tokens.Token) *FunctionLiteral {
+	return &FunctionLiteral{
+		Token: t,
+	}
+}
+
+func (f *FunctionLiteral) expressionNode() {}
+func (f *FunctionLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionLiteral) ToString() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(f.TokenLiteral())
+	buffer.WriteString("(")
+
+	for _, v := range f.Paramenters {
+		buffer.WriteString(v.ToString() + ", ")
+	}
+
+	buffer.WriteString(")")
+	buffer.WriteString(f.Body.ToString())
 
 	return buffer.String()
 }

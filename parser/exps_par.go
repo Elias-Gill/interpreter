@@ -127,28 +127,16 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	exp.Consequence = p.parseBlockStatement()
 
-	if !p.expectCurToken(tokens.RBRAC) {
-		p.errors = append(p.errors, "Missing closing '}' on if")
-		return nil
-	}
-
 	// if not "else" block, return
-	if !p.nextTokenIs(tokens.ELSE) {
+	if !p.curTokenIs(tokens.ELSE) {
 		return exp
 	}
-
-	p.advanceToken()
 
 	if !p.advanceIfNextToken(tokens.LBRAC) {
 		return nil
 	}
 
 	exp.Alternative = p.parseBlockStatement()
-
-	if !p.expectCurToken(tokens.RBRAC) {
-		p.errors = append(p.errors, "Missing closing '}' on else")
-		return nil
-	}
 
 	return exp
 }

@@ -122,7 +122,7 @@ func testInfix(t *testing.T, exp ast.Expression, expected string) {
 func testVar(t *testing.T, exp ast.Statement, identifier string, value interface{}) {
 
     if exp.TokenLiteral() != "var" {
-        t.Errorf("Parser error\n \tCannot convert statement to ast.ReturnStatement")
+        t.Errorf("Cannot convert statement to ast.ReturnStatement")
         return
     }
 
