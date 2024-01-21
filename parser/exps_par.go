@@ -7,37 +7,9 @@ import (
 	"github.com/sl2.0/tokens"
 )
 
-// ---------------------------------
-// ----- Parsing expressions -------
-// ---------------------------------
-
-// First parse the prefix side of the expression (identifiers, numbers and unary operators),
-// then parse the infix part of the expression if exists
-func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.currentToken.Type]
-
-	if prefix == nil {
-		p.errors = append(p.errors, "Not prefixFn found for: "+p.currentToken.Literal)
-		return nil
-	}
-
-	exp := prefix()
-
-	for !p.nextTokenIs(tokens.SEMICOLON) && precedence < p.nextPrecendence() {
-		infix := p.infixParseFns[p.nextToken.Type]
-
-		if infix == nil {
-			return exp
-		}
-
-		p.advanceToken()
-
-		// parse and create an infix expression adding the current prefix expression to it
-		exp = infix(exp)
-	}
-
-	return exp
-}
+// ------------------------------
+// -- Prefix parsing functions --
+// ------------------------------
 
 // Parses prefix expressions (like -X or !X)
 func (p *Parser) parsePrefixExpression() ast.Expression {
@@ -64,22 +36,6 @@ func (p *Parser) parseNumber() ast.Expression {
 		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
 		p.errors = append(p.errors, msg)
 	}
-
-	return exp
-}
-
-func (p *Parser) parseInfixExpression(e ast.Expression) ast.Expression {
-	exp := &ast.InfixExpression{
-		Left:     e,
-		Operator: p.currentToken.Literal,
-		Token:    p.currentToken,
-	}
-
-	precedence := p.curPrecendence()
-
-	p.advanceToken()
-
-	exp.Right = p.parseExpression(precedence)
 
 	return exp
 }
@@ -139,7 +95,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseFunctionExpression() ast.Expression {
+func (p *Parser) parseFunctionLiteral() ast.Expression {
 	f := ast.NewFunctionLiteral(p.currentToken)
 
 	if !p.advanceIfNextToken(tokens.LPAR) {
@@ -171,6 +127,26 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	if !p.advanceIfNextToken(tokens.RPAR) {
 		return nil
 	}
+
+	return exp
+}
+
+// -----------------------------
+// -- Infix parsing functions --
+// -----------------------------
+
+func (p *Parser) parseInfixExpression(e ast.Expression) ast.Expression {
+	exp := &ast.InfixExpression{
+		Left:     e,
+		Operator: p.currentToken.Literal,
+		Token:    p.currentToken,
+	}
+
+	precedence := p.curPrecendence()
+
+	p.advanceToken()
+
+	exp.Right = p.parseExpression(precedence)
 
 	return exp
 }

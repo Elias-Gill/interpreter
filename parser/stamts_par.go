@@ -9,21 +9,6 @@ import (
 // ----- Parsing statements -------
 // --------------------------------
 
-func (p *Parser) parseStatement() ast.Statement {
-	switch p.currentToken.Type {
-	case tokens.VAR:
-		return p.parseVarStatement()
-	case tokens.RETURN:
-		return p.parseReturnStatement()
-	case tokens.FUNCTION:
-		return p.parseFunctionStatement()
-	case tokens.LINEBREAK:
-		return nil
-	default:
-		return p.parseExpressionStatement()
-	}
-}
-
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{
 		Token: p.currentToken,
