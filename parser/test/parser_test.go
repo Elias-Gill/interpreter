@@ -265,6 +265,14 @@ func TestOperatorPrecedence(t *testing.T) {
 			input:         ` -2 > 5 + 4*nada == 33; `,
 			expectedValue: "(((-2)>(5+(4*nada)))==33)",
 		},
+        {
+            input:         ` -2 > (5 + 4)*nada == 33; `,
+            expectedValue: "(((-2)>((5+4)*nada))==33)",
+        },
+        {
+            input:         ` -2 + (5 + 4)*nada/(feo + 2); `,
+            expectedValue: "((-2)+(((5+4)*nada)/(feo+2)))",
+        },
 	}
 
 	for _, tc := range tesCases {

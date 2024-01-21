@@ -18,7 +18,6 @@ func (p *Parser) parseStatement() ast.Statement {
 	case tokens.FUNCTION:
 		return p.parseFunctionStatement()
 	case tokens.LINEBREAK:
-		// Do nothing for now (TODO:)
 		return nil
 	default:
 		return p.parseExpressionStatement()

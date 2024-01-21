@@ -95,8 +95,6 @@ func (p *Parser) parseBoolExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseGroupedExpression() ast.Expression { return nil }
-
 func (p *Parser) parseIfExpression() ast.Expression {
 	exp := ast.NewIfExpression(p.currentToken)
 
@@ -164,3 +162,16 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 
 	return f
 }
+
+func (p *Parser) parseGroupedExpression() ast.Expression { 
+    p.advanceToken()
+
+    exp := p.parseExpression(LOWEST)
+
+    if !p.advanceIfNextToken(tokens.RPAR) {
+        return nil
+    }
+
+    return exp 
+}
+
