@@ -265,14 +265,14 @@ func TestOperatorPrecedence(t *testing.T) {
 			input:         ` -2 > 5 + 4*nada == 33; `,
 			expectedValue: "(((-2)>(5+(4*nada)))==33)",
 		},
-        {
-            input:         ` -2 > (5 + 4)*nada == 33; `,
-            expectedValue: "(((-2)>((5+4)*nada))==33)",
-        },
-        {
-            input:         ` -2 + (5 + 4)*nada/(feo + 2); `,
-            expectedValue: "((-2)+(((5+4)*nada)/(feo+2)))",
-        },
+		{
+			input:         ` -2 > (5 + 4)*nada == 33; `,
+			expectedValue: "(((-2)>((5+4)*nada))==33)",
+		},
+		{
+			input:         ` -2 + (5 + 4)*nada/(feo + 2); `,
+			expectedValue: "((-2)+(((5+4)*nada)/(feo+2)))",
+		},
 	}
 
 	for _, tc := range tesCases {
@@ -403,11 +403,10 @@ func TestFuncExpression(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.VarStatement")
 	}
 
-    exp, ok := stmt.Value.(*ast.FunctionLiteral)
-    if !ok {
-        t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
-    }
-
+	exp, ok := stmt.Value.(*ast.FunctionLiteral)
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
+	}
 
 	if len(exp.Paramenters) != 2 {
 		t.Fatalf("Expected 2 parameters. Got %v", len(exp.Paramenters))
@@ -424,4 +423,45 @@ func TestFuncExpression(t *testing.T) {
 	}
 
 	testVar(t, exp.Body.Statements[0], "nuevo", 33)
+}
+
+func TestFuncCall(t *testing.T) {
+	input := `new_function(x, y + 1)`
+	args_list := []string{"x", "(y+1)"}
+
+	p := generateProgram(t, input)
+
+	if len(p.Statements) != 1 {
+		t.Fatalf("Number of statements found: %d", len(p.Statements))
+	}
+
+	if p.Statements[0].TokenLiteral() != "new_function" {
+		t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
+	}
+
+	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
+	}
+
+	exp, ok := stmt.Expression.(*ast.FunctionCall)
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.FunctionCall")
+	}
+
+    if exp.Ident.ToString() != "new_function" {
+        t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
+    }
+
+	if len(exp.Arguments) != 2 {
+		t.Fatalf("Expected 2 arguments. Got %v", len(exp.Arguments))
+	}
+
+	for i, v := range exp.Arguments {
+		if v.ToString() != args_list[i] {
+			t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString())
+		}
+	}
+
+    t.Log(exp.ToString())
 }

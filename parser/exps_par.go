@@ -163,15 +163,47 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 	return f
 }
 
-func (p *Parser) parseGroupedExpression() ast.Expression { 
-    p.advanceToken()
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.advanceToken()
 
-    exp := p.parseExpression(LOWEST)
+	exp := p.parseExpression(LOWEST)
 
-    if !p.advanceIfNextToken(tokens.RPAR) {
-        return nil
-    }
+	if !p.advanceIfNextToken(tokens.RPAR) {
+		return nil
+	}
 
-    return exp 
+	return exp
 }
 
+func (p *Parser) parseCall(e ast.Expression) ast.Expression {
+	f := ast.NewFunctionCall(p.currentToken, e)
+	f.Arguments = p.parseCallArguments()
+	return f
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := []ast.Expression{}
+
+	// empty arguments
+	if p.nextTokenIs(tokens.RPAR) {
+		p.advanceToken()
+		return args
+	}
+
+	p.advanceToken()
+
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.nextTokenIs(tokens.COMMA) {
+		// jump comma and place on next ident
+		p.advanceToken()
+		p.advanceToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.advanceIfNextToken(tokens.RPAR) {
+		return nil
+	}
+
+	return args
+}

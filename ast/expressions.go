@@ -182,3 +182,37 @@ func (f *FunctionLiteral) ToString() string {
 
 	return buffer.String()
 }
+
+type FunctionCall struct {
+	Arguments []Expression
+	Ident     Expression
+	Token     tokens.Token
+}
+
+func NewFunctionCall(t tokens.Token, i Expression) *FunctionCall {
+	return &FunctionCall{
+		Token: t,
+		Ident: i,
+	}
+}
+
+func (f *FunctionCall) expressionNode() {}
+func (f *FunctionCall) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionCall) ToString() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(f.Ident.ToString())
+	buffer.WriteString(f.TokenLiteral())
+
+	for i := 0; i < len(f.Arguments)-1; i++ {
+		v := f.Arguments[i]
+		buffer.WriteString(v.ToString() + ", ")
+	}
+
+	buffer.WriteString(f.Arguments[len(f.Arguments)-1].ToString())
+	buffer.WriteString(")")
+
+	return buffer.String()
+}

@@ -76,7 +76,7 @@ func NewParser(input string) *Parser {
 	parser.registerInfixFn(tokens.LT, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.EQUALS, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.NOTEQUAL, parser.parseInfixExpression)
-	// parser.registerInfix(tokens.LPAR, parser.parseCall)
+	parser.registerInfixFn(tokens.LPAR, parser.parseCall)
 
 	return parser
 }
@@ -97,3 +97,4 @@ func (p *Parser) ParseProgram() *ast.Ast {
 
 	return tree
 }
+
