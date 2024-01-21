@@ -449,9 +449,9 @@ func TestFuncCall(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.FunctionCall")
 	}
 
-    if exp.Ident.ToString() != "new_function" {
-        t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
-    }
+	if exp.Ident.ToString() != "new_function" {
+		t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
+	}
 
 	if len(exp.Arguments) != 2 {
 		t.Fatalf("Expected 2 arguments. Got %v", len(exp.Arguments))
@@ -463,5 +463,5 @@ func TestFuncCall(t *testing.T) {
 		}
 	}
 
-    t.Log(exp.ToString())
+	t.Log(exp.ToString())
 }

@@ -4,5 +4,11 @@ test:
 format:
 	gofmt -s -w .
 
-run:
+repl:
 	go run .
+
+lexer:
+	go run . --lexer
+
+parser:
+	go run . --parser

@@ -99,9 +99,9 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
 
-                {Type: tokens.ELSE, Literal: "sino"},
-                {Type: tokens.LBRAC, Literal: "{"},
-                {Type: tokens.RBRAC, Literal: "}"},
+				{Type: tokens.ELSE, Literal: "sino"},
+				{Type: tokens.LBRAC, Literal: "{"},
+				{Type: tokens.RBRAC, Literal: "}"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
 

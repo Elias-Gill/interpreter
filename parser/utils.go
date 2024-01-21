@@ -45,15 +45,15 @@ func (p *Parser) nextPrecendence() int {
 
 // Compares the current token type with the expected type.
 func (p *Parser) curTokenIs(expTy tokens.TokenType) bool {
-    return p.currentToken.Type == expTy
+	return p.currentToken.Type == expTy
 }
 
 // Compares the next token type with the expected type.
 func (p *Parser) nextTokenIs(expTy tokens.TokenType) bool {
-    return p.nextToken.Type == expTy
+	return p.nextToken.Type == expTy
 }
 
-// Compares the current token type with the expected type and generates a parsing error if 
+// Compares the current token type with the expected type and generates a parsing error if
 // false.
 func (p *Parser) expectCurToken(expTy tokens.TokenType) bool {
 	if p.currentToken.Type == expTy {
@@ -67,38 +67,38 @@ func (p *Parser) expectCurToken(expTy tokens.TokenType) bool {
 }
 
 func (p *Parser) expectNextToken(expTy tokens.TokenType) bool {
-    if p.nextToken.Type == expTy {
-        return true
-    }
+	if p.nextToken.Type == expTy {
+		return true
+	}
 
-    msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
-    p.errors = append(p.errors, msg)
+	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
+	p.errors = append(p.errors, msg)
 
-    return false
+	return false
 }
 
-// Advances to the next token if equals the given token type. Generates a parsing error if 
+// Advances to the next token if equals the given token type. Generates a parsing error if
 // false.
 func (p *Parser) advanceIfNextToken(expTy tokens.TokenType) bool {
-    if p.nextToken.Type == expTy {
-        p.advanceToken()
-        return true
-    }
+	if p.nextToken.Type == expTy {
+		p.advanceToken()
+		return true
+	}
 
-    msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
-    p.errors = append(p.errors, msg)
+	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
+	p.errors = append(p.errors, msg)
 
-    return false
+	return false
 }
 
 func (p *Parser) advanceIfCurToken(expTy tokens.TokenType) bool {
-    if p.currentToken.Type == expTy {
-        p.advanceToken()
-        return true
-    }
+	if p.currentToken.Type == expTy {
+		p.advanceToken()
+		return true
+	}
 
-    msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.currentToken.Literal)
-    p.errors = append(p.errors, msg)
+	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.currentToken.Literal)
+	p.errors = append(p.errors, msg)
 
-    return false
+	return false
 }

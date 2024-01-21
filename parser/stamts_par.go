@@ -90,8 +90,8 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	tree.Statements = []ast.Statement{}
 
 	if !p.advanceIfCurToken(tokens.LBRAC) {
-        return nil
-    }
+		return nil
+	}
 
 	for !p.curTokenIs(tokens.EOF) && !p.curTokenIs(tokens.RBRAC) {
 		stmt := p.parseStatement()
@@ -104,7 +104,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	if !p.advanceIfCurToken(tokens.RBRAC) {
-        return nil
+		return nil
 	}
 
 	return tree
@@ -143,8 +143,8 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 func (p *Parser) parseFuncParameters() []*ast.Identifier {
 	var params []*ast.Identifier
 
-    // jump "("
-    p.advanceToken()
+	// jump "("
+	p.advanceToken()
 
 	for !p.curTokenIs(tokens.RPAR) {
 		ident := ast.NewIdentifier(p.currentToken)

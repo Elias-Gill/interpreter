@@ -41,17 +41,17 @@ func StartParserREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
 	for {
-        fmt.Print(">>> ")
+		fmt.Print(">>> ")
 
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
-        line := scanner.Text()
-        if line == "exit" {
-            return
-        }
+		line := scanner.Text()
+		if line == "exit" {
+			return
+		}
 
 		p := parser.NewParser(line)
 		program := p.ParseProgram()

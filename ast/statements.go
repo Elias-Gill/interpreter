@@ -130,7 +130,7 @@ func (f *FunctionStatement) ToString() string {
 	}
 
 	buffer.WriteString(")")
-    buffer.WriteString(f.Body.ToString())
-    
+	buffer.WriteString(f.Body.ToString())
+
 	return buffer.String()
 }
