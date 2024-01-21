@@ -57,7 +57,7 @@ var keywords = map[string]TokenType{
 	"var":     VAR,
 	"si":      IF,
 	"sino":    ELSE,
-	"desde":   FOR,
+	"repetir": FOR,
 	"retorna": RETURN,
 
 	// datatype keywords

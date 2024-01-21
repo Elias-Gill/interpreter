@@ -302,13 +302,19 @@ func TestOperatorPrecedence(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `si (numero > 33) {
-    var nuevo = 33;
-    } sino { var nuevo = true; }`
+	input := `
+    si (numero > 33) {
+        var nuevo = 33;
+    } sino { 
+        var nuevo = true; 
+    }
+
+    var nuevo = 2;
+    `
 
 	p := generateProgram(t, input)
 
-	if len(p.Statements) != 1 {
+	if len(p.Statements) != 2 {
 		t.Fatalf("Number of statements found: %d", len(p.Statements))
 	}
 
@@ -426,17 +432,76 @@ func TestFuncExpression(t *testing.T) {
 }
 
 func TestFuncCall(t *testing.T) {
-	input := `new_function(x, y + 1)`
-	args_list := []string{"x", "(y+1)"}
+	testCases := []struct {
+		input string
+		args  []string
+	}{
+		{
+			input: `new_function(x, y + 1)`,
+			args:  []string{"x", "(y+1)"},
+		},
+		{
+			input: `new_function(x * (4 + 33), y + 1)`,
+			args:  []string{"(x*(4+33))", "(y+1)"},
+		},
+	}
+
+	for _, tc := range testCases {
+		input := tc.input
+		args_list := tc.args
+
+		p := generateProgram(t, input)
+
+		if len(p.Statements) != 1 {
+			t.Fatalf("Number of statements found: %d", len(p.Statements))
+		}
+
+		if p.Statements[0].TokenLiteral() != "new_function" {
+			t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
+		}
+
+		stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
+		}
+
+		exp, ok := stmt.Expression.(*ast.FunctionCall)
+		if !ok {
+			t.Fatalf("Cannot convert statement to ast.FunctionCall")
+		}
+
+		if exp.Ident.ToString() != "new_function" {
+			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
+		}
+
+		if len(exp.Arguments) != 2 {
+			t.Fatalf("Expected 2 arguments. Got %v", len(exp.Arguments))
+		}
+
+		for i, v := range exp.Arguments {
+			if v.ToString() != args_list[i] {
+				t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString())
+			}
+		}
+	}
+}
+
+func TestForLoop(t *testing.T) {
+	input := `
+    repetir 2 {
+        var nuevo = 33;
+    }
+    var nuevo = 33;
+    `
 
 	p := generateProgram(t, input)
 
-	if len(p.Statements) != 1 {
+	if len(p.Statements) != 2 {
 		t.Fatalf("Number of statements found: %d", len(p.Statements))
 	}
 
-	if p.Statements[0].TokenLiteral() != "new_function" {
-		t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
+	if p.Statements[0].TokenLiteral() != "repetir" {
+		t.Fatalf("Expected 'func'. Got: %v", p.Statements[0].TokenLiteral())
 	}
 
 	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
@@ -444,24 +509,22 @@ func TestFuncCall(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
 	}
 
-	exp, ok := stmt.Expression.(*ast.FunctionCall)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.FunctionCall")
+	exp, ok := stmt.Expression.(*ast.ForLoop)
+    if !ok {
+        t.Fatalf("Cannot convert statement to ast.ForLoop")
+    }
+
+    if exp.Iterations.Value != 2 {
+        t.Fatalf("Expected value for iterations to be '2'. Got %v", exp.Iterations.Value)
+    }
+
+	if len(exp.Body.Statements) != 1 {
+		t.Fatalf("Expected 1 statement on for loop body. Got %v", len(exp.Body.Statements))
 	}
 
-	if exp.Ident.ToString() != "new_function" {
-		t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
+	if exp.Body == nil {
+		t.Fatalf("Empty function body")
 	}
 
-	if len(exp.Arguments) != 2 {
-		t.Fatalf("Expected 2 arguments. Got %v", len(exp.Arguments))
-	}
-
-	for i, v := range exp.Arguments {
-		if v.ToString() != args_list[i] {
-			t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString())
-		}
-	}
-
-	t.Log(exp.ToString())
+    testVar(t, exp.Body.Statements[0], "nuevo", 33)
 }

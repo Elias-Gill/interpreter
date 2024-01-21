@@ -64,6 +64,7 @@ func TestNextToken(t *testing.T) {
                 } sino {}
 
                 retorna nombre
+                repetir 33;
             }`,
 			[]tokens.Token{
 				{Type: tokens.FUNCTION, Literal: "func"},
@@ -109,6 +110,12 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.IDENT, Literal: "nombre"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
+
+                {Type: tokens.FOR, Literal: "repetir"},
+                {Type: tokens.NUMBER, Literal: "33"},
+                {Type: tokens.SEMICOLON, Literal: ";"},
+
+                {Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.EOF, Literal: ""},

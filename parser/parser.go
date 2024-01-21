@@ -67,6 +67,7 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)
 	parser.registerPrefixFn(tokens.IF, parser.parseIfExpression)
 	parser.registerPrefixFn(tokens.FUNCTION, parser.parseFunctionLiteral)
+    parser.registerPrefixFn(tokens.FOR, parser.parseForLoop)
 
 	parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)

@@ -183,3 +183,23 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 
 	return args
 }
+
+func (p *Parser) parseForLoop() ast.Expression {
+	exp := ast.NewForLoop(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.NUMBER) {
+		p.errors = append(p.errors, "Missing 'iterations' on for loop")
+		return nil
+	}
+
+    exp.Iterations = *ast.NewInteger(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.LBRAC) {
+		p.errors = append(p.errors, "Missing opening '{' on for loop body")
+		return nil
+	}
+
+	exp.Body = p.parseBlockStatement()
+
+	return exp
+}

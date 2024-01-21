@@ -216,3 +216,29 @@ func (f *FunctionCall) ToString() string {
 
 	return buffer.String()
 }
+
+type ForLoop struct {
+	Iterations Integer
+	Body       *BlockStatement
+	Token      tokens.Token
+}
+
+func NewForLoop(t tokens.Token) *ForLoop {
+	return &ForLoop{
+		Token: t,
+	}
+}
+
+func (f *ForLoop) expressionNode() {}
+func (f *ForLoop) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *ForLoop) ToString() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(f.TokenLiteral() + " ")
+	buffer.WriteString(f.Iterations.ToString())
+	buffer.WriteString(f.Body.ToString())
+
+	return buffer.String()
+}
