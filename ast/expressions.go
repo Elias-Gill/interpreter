@@ -29,27 +29,27 @@ func (i *Identifier) ToString() string {
 	return i.Value
 }
 
-type Integer struct {
+type IntegerLiteral struct {
 	Value int64
 	Token tokens.Token
 }
 
-func NewInteger(t tokens.Token) *Integer {
+func NewInteger(t tokens.Token) *IntegerLiteral {
 	value, err := strconv.ParseInt(t.Literal, 0, 64)
 	if err != nil {
 		return nil
 	}
 
-	return &Integer{
+	return &IntegerLiteral{
 		Value: value,
 		Token: t,
 	}
 }
-func (i *Integer) expressionNode() {}
-func (i *Integer) TokenLiteral() string {
+func (i *IntegerLiteral) expressionNode() {}
+func (i *IntegerLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *Integer) ToString() string {
+func (i *IntegerLiteral) ToString() string {
 	return i.TokenLiteral()
 }
 
@@ -218,7 +218,7 @@ func (f *FunctionCall) ToString() string {
 }
 
 type ForLoop struct {
-	Iterations Integer
+	Iterations IntegerLiteral
 	Body       *BlockStatement
 	Token      tokens.Token
 }

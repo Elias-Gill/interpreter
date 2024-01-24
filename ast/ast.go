@@ -22,16 +22,24 @@ type Statement interface {
 	statementNode()
 }
 
-type Ast struct {
+type Program struct {
 	Statements []Statement
 }
 
-func (a *Ast) ToString() string {
+func (p *Program) ToString() string {
 	var buffer bytes.Buffer
 
-	for _, stmt := range a.Statements {
+	for _, stmt := range p.Statements {
 		buffer.WriteString(stmt.ToString())
 	}
 
 	return buffer.String()
+}
+
+func (p *Program) TokenLiteral() string {
+    if len(p.Statements) > 0 {
+        return p.Statements[0].TokenLiteral()
+    } else {
+        return ""
+    }
 }

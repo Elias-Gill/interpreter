@@ -45,15 +45,37 @@ var precedences = map[string]int{
 	tokens.LPAR:     CALL,
 }
 
+// Generates a new parser using the given input string
 func NewParser(input string) *Parser {
+    parser := &Parser{
+        lexer:  lexer.NewLexer(input),
+        errors: []string{},
+
+        infixParseFns:  make(map[tokens.TokenType]infixFn),
+        prefixParseFns: make(map[tokens.TokenType]prefixFn),
+    }
+
+    parser.InitParsingFns()
+
+    return parser
+}
+
+// Returns a new parser using the tokens from a custom lexer
+func NewParserFromLexer(lexer *lexer.Lexer) *Parser {
 	parser := &Parser{
-		lexer:  lexer.NewLexer(input),
+		lexer:  lexer,
 		errors: []string{},
 
 		infixParseFns:  make(map[tokens.TokenType]infixFn),
 		prefixParseFns: make(map[tokens.TokenType]prefixFn),
 	}
 
+    parser.InitParsingFns()
+
+	return parser
+}
+
+func (parser *Parser) InitParsingFns() {
 	// to setup the parser in the correct initial state
 	parser.advanceToken()
 	parser.advanceToken()
@@ -67,7 +89,7 @@ func NewParser(input string) *Parser {
 	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)
 	parser.registerPrefixFn(tokens.IF, parser.parseIfExpression)
 	parser.registerPrefixFn(tokens.FUNCTION, parser.parseFunctionLiteral)
-    parser.registerPrefixFn(tokens.FOR, parser.parseForLoop)
+	parser.registerPrefixFn(tokens.FOR, parser.parseForLoop)
 
 	parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.PLUS, parser.parseInfixExpression)
@@ -78,12 +100,10 @@ func NewParser(input string) *Parser {
 	parser.registerInfixFn(tokens.EQUALS, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.NOTEQUAL, parser.parseInfixExpression)
 	parser.registerInfixFn(tokens.LPAR, parser.parseCall)
-
-	return parser
 }
 
-func (p *Parser) ParseProgram() *ast.Ast {
-	tree := &ast.Ast{}
+func (p *Parser) ParseProgram() *ast.Program {
+	tree := &ast.Program{}
 	tree.Statements = []ast.Statement{}
 
 	for !p.curTokenIs(tokens.EOF) {

@@ -24,13 +24,15 @@ func main() {
 	// Check if either --parser or --lexer flag is provided
 	if *parserFlag {
 		fmt.Printf("in%s parser%s mode:\n", colorMagenta, colorNone)
-		repl.StartParserREPL(os.Stdin, os.Stdout)
+		repl.StartLiveParser(os.Stdin, os.Stdout)
 		return
 	}
 
 	if *lexerFlag {
 		fmt.Printf("in%s lexer%s mode:\n", colorMagenta, colorNone)
-		repl.StartLexerREPL(os.Stdin, os.Stdout)
+		repl.StartLiveLexer(os.Stdin, os.Stdout)
 		return
 	}
+
+    repl.StartREPL(os.Stdin, os.Stdout)
 }

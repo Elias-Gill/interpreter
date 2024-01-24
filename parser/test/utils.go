@@ -22,7 +22,7 @@ Generate a new parser with the given input and parse the program.
 Fatal if parsing errors encountered, or the parsing program returns an empty AST.
 Then return the given AST.
 */
-func generateProgram(t *testing.T, input string) *ast.Ast {
+func generateProgram(t *testing.T, input string) *ast.Program {
 	parser := parser.NewParser(input)
 	p := parser.ParseProgram()
 
@@ -83,7 +83,7 @@ func testBoolLiteral(t *testing.T, exp ast.Expression) bool {
 }
 
 func testIntLiteral(t *testing.T, exp ast.Expression, expected int64) bool {
-	number, ok := exp.(*ast.Integer)
+	number, ok := exp.(*ast.IntegerLiteral)
 	if !ok {
 		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString())
 		return false
