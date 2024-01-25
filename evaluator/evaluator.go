@@ -33,6 +33,12 @@ func Eval(node ast.Node) objects.Object {
 
 	case *ast.InfixExpression:
 		return evalInfix(node)
+
+	case *ast.IfExpression:
+		return evalIf(node)
+
+	case *ast.BlockStatement:
+		return parseStatements(node.Statements)
 	}
 
 	return nil
@@ -76,12 +82,12 @@ func evalInfix(exp *ast.InfixExpression) objects.Object {
 	switch exp.Operator {
 	case "+":
 		return &objects.Integer{Value: left.Value + right.Value}
-    case "-":
-        return &objects.Integer{Value: left.Value - right.Value}
-    case "*":
-        return &objects.Integer{Value: left.Value * right.Value}
-    case "/":
-        return &objects.Integer{Value: left.Value / right.Value}
+	case "-":
+		return &objects.Integer{Value: left.Value - right.Value}
+	case "*":
+		return &objects.Integer{Value: left.Value * right.Value}
+	case "/":
+		return &objects.Integer{Value: left.Value / right.Value}
 	}
 
 	return nil
@@ -101,4 +107,23 @@ func evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 	}
 
 	return true_obj
+}
+
+func evalIf(exp *ast.IfExpression) objects.Object {
+	condition := Eval(exp.Condition)
+
+    if condition.Type() != objects.BOOL_OBJ {
+        // TODO: agregar mensaje de error
+        return nil
+    }
+
+	if condition == true_obj {
+		return Eval(exp.Consequence)
+	}
+
+	if exp.Alternative != nil {
+		return Eval(exp.Alternative)
+	}
+
+    return nil
 }
