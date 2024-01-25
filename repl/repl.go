@@ -89,18 +89,26 @@ func StartREPL(in io.Reader, out io.Writer) {
 		p := parser.NewParser(line)
 		program := p.ParseProgram()
 
-		if len(p.Errors()) != 0 {
+		if p.HasErrors() {
 			printParserErrors(out, p.Errors())
 			continue
 		}
 
-        evaluated := evaluator.Eval(program)
-        if evaluated != nil {
-            io.WriteString(out, evaluated.Inspect())
-            io.WriteString(out, "\n")
-        } else {
-            io.WriteString(out, "Feature not implemented\n")
+		ev := evaluator.NewFromProgram(program)
+
+		evaluated := ev.EvalProgram()
+
+        if ev.HasErrors() {
+            printParserErrors(out, ev.Errors())
+            continue
         }
+
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		} else {
+			io.WriteString(out, "Feature not implemented\n")
+		}
 	}
 }
 

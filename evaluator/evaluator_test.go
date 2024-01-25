@@ -15,18 +15,7 @@ func TestIntegerEvaluation(t *testing.T) {
 		return
 	}
 
-	if evaluated.Type() != objects.INTEGER_OBJ {
-		t.Fatalf("Expected 'Object integer' type. Got %s", evaluated.Type())
-	}
-
-	value, ok := evaluated.(*objects.Integer)
-	if !ok {
-		t.Fatalf("Cannot parse to 'Object integer'")
-	}
-
-	if value.Value != 1123 {
-		t.Fatalf("Expected '1123'. Got %d", value.Value)
-	}
+	testInteger(t, evaluated, 1123)
 }
 
 func TestBooleanEvaluation(t *testing.T) {
@@ -47,6 +36,60 @@ func TestBangOperator(t *testing.T) {
 	}
 
 	testBool(t, evaluated, false)
+}
+
+func TestMinusOperator(t *testing.T) {
+	evaluated := parseAndEval(t, "-12")
+
+	if evaluated == nil {
+		return
+	}
+
+	testInteger(t, evaluated, -12)
+}
+
+func TestInfixArithmetic(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected int
+	}{
+		{tcase: "-12 + 24 - -12", expected: 24},
+		{tcase: "-12 - 12 * -2 ", expected: 12},
+		{tcase: "(-12 + 24) * 2 ", expected: 24},
+		{tcase: "-(11 + 1) * 2 ", expected: -24},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testInteger(t, evaluated, int64(tc.expected))
+	}
+}
+
+func TestInfixComparition(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected bool
+	}{
+		{tcase: "-12 + 24 < -12", expected: false},
+		{tcase: "-12 + 24 > -12", expected: true},
+		{tcase: "(-12 + 24) == 12 ", expected: true},
+		{tcase: "-(11 + 1) != 2 ", expected: true},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testBool(t, evaluated, tc.expected)
+	}
 }
 
 // --- Testing utils ---
@@ -81,7 +124,9 @@ func parseAndEval(t *testing.T, input string) objects.Object {
 		return nil
 	}
 
-	evaluated := Eval(p)
+	ev := NewFromProgram(p)
+	evaluated := ev.EvalProgram()
+
 	if evaluated == nil {
 		t.Errorf("Evaluator returned a nil value")
 		return nil
@@ -105,4 +150,23 @@ func testBool(t *testing.T, evaluated objects.Object, expected bool) {
 	if value.Value != expected {
 		t.Errorf("Expected '%v'. Got %v", expected, value.Value)
 	}
+}
+
+func testInteger(t *testing.T, evaluated objects.Object, expected int64) bool {
+	if evaluated.Type() != objects.INTEGER_OBJ {
+		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Type())
+		return false
+	}
+
+	value, ok := evaluated.(*objects.Integer)
+	if !ok {
+		t.Errorf("Cannot parse to 'Object integer'")
+		return false
+	}
+
+	if value.Value != expected {
+		t.Errorf("Expected '1123'. Got %d", value.Value)
+	}
+
+	return true
 }

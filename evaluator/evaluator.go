@@ -1,17 +1,70 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/sl2.0/ast"
 	"github.com/sl2.0/objects"
+	"github.com/sl2.0/parser"
 	"github.com/sl2.0/tokens"
 )
 
 var (
 	true_obj  = &objects.Boolean{Value: true}
 	false_obj = &objects.Boolean{Value: false}
+	null_obj  = &objects.NULL{}
 )
 
-func Eval(node ast.Node) objects.Object {
+type Evaluator struct {
+	errors  []string
+	program *ast.Program
+}
+
+func NewFromInput(input string) *Evaluator {
+	eval := &Evaluator{}
+	pars := parser.NewParser(input)
+
+	if pars == nil {
+		eval.errors = append(eval.errors, "Parser returned a nil value")
+		return nil
+	}
+
+	eval.program = pars.ParseProgram()
+
+	if pars.HasErrors() {
+		eval.errors = pars.Errors()
+		return nil
+	}
+
+	return eval
+}
+
+func NewFromProgram(ast *ast.Program) *Evaluator {
+	eval := &Evaluator{}
+
+	if ast == nil {
+		eval.errors = append(eval.errors, "Submited an empty(nil) ast")
+		return nil
+	}
+
+	eval.program = ast
+
+	return eval
+}
+
+func (e *Evaluator) Errors() []string {
+	return e.errors
+}
+
+func (e *Evaluator) HasErrors() bool {
+	return len(e.errors) != 0
+}
+
+func (e *Evaluator) EvalProgram() objects.Object {
+	return e.eval(e.program)
+}
+
+func (e *Evaluator) eval(node ast.Node) objects.Object {
 	switch node := node.(type) {
 	case *ast.IntegerLiteral:
 		return &objects.Integer{Value: node.Value}
@@ -23,107 +76,37 @@ func Eval(node ast.Node) objects.Object {
 		return false_obj
 
 	case *ast.Program:
-		return parseStatements(node.Statements)
+		return e.parseStatements(node.Statements)
 
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return e.eval(node.Expression)
 
 	case *ast.PrefixExpression:
-		return evalPrefix(node)
+		return e.evalPrefix(node)
 
 	case *ast.InfixExpression:
-		return evalInfix(node)
+		return e.evalInfix(node)
 
 	case *ast.IfExpression:
-		return evalIf(node)
+		return e.evalIfExpression(node)
 
 	case *ast.BlockStatement:
-		return parseStatements(node.Statements)
+		return e.parseStatements(node.Statements)
 	}
 
-	return nil
+	e.errors = append(e.errors,
+		fmt.Sprintf("Cannot evaluate node: %v", node.ToString()))
+
+	return null_obj
 }
 
-func parseStatements(stmts []ast.Statement) objects.Object {
+func (e *Evaluator) parseStatements(stmts []ast.Statement) objects.Object {
 	var res objects.Object
 
 	for _, value := range stmts {
-		res = Eval(value)
+		res = e.eval(value)
 	}
 
 	return res
 }
 
-func evalPrefix(exp *ast.PrefixExpression) objects.Object {
-	switch exp.Operator {
-	case "!":
-		return evalBangOperator(exp)
-	}
-
-	return nil
-}
-
-// TODO: refactor mas tarde para poder con los if y las function calls
-func evalInfix(exp *ast.InfixExpression) objects.Object {
-	evalLeft := Eval(exp.Left)
-	left, ok := evalLeft.(*objects.Integer)
-	if !ok {
-		// TODO: add error messages
-		return nil
-	}
-
-	evalRight := Eval(exp.Right)
-	right, ok := evalRight.(*objects.Integer)
-	if !ok {
-		// TODO: add error messages
-		return nil
-	}
-
-	switch exp.Operator {
-	case "+":
-		return &objects.Integer{Value: left.Value + right.Value}
-	case "-":
-		return &objects.Integer{Value: left.Value - right.Value}
-	case "*":
-		return &objects.Integer{Value: left.Value * right.Value}
-	case "/":
-		return &objects.Integer{Value: left.Value / right.Value}
-	}
-
-	return nil
-}
-
-func evalBangOperator(exp *ast.PrefixExpression) objects.Object {
-	value := Eval(exp.Right)
-
-	if value.Type() != objects.BOOL_OBJ {
-		// TODO: add error messages
-		return nil
-	}
-
-	// TODO: rethink these lines
-	if value.Inspect() == true_obj.Inspect() {
-		return false_obj
-	}
-
-	return true_obj
-}
-
-func evalIf(exp *ast.IfExpression) objects.Object {
-	condition := Eval(exp.Condition)
-
-    if condition.Type() != objects.BOOL_OBJ {
-        // TODO: agregar mensaje de error
-        return nil
-    }
-
-	if condition == true_obj {
-		return Eval(exp.Consequence)
-	}
-
-	if exp.Alternative != nil {
-		return Eval(exp.Alternative)
-	}
-
-    return nil
-}

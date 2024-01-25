@@ -15,6 +15,10 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
+func (p *Parser) HasErrors() bool {
+    return len(p.errors) != 0
+}
+
 func (p *Parser) registerInfixFn(t tokens.TokenType, f infixFn) {
 	p.infixParseFns[t] = f
 }
@@ -51,30 +55,6 @@ func (p *Parser) curTokenIs(expTy tokens.TokenType) bool {
 // Compares the next token type with the expected type.
 func (p *Parser) nextTokenIs(expTy tokens.TokenType) bool {
 	return p.nextToken.Type == expTy
-}
-
-// Compares the current token type with the expected type and generates a parsing error if
-// false.
-func (p *Parser) expectCurToken(expTy tokens.TokenType) bool {
-	if p.currentToken.Type == expTy {
-		return true
-	}
-
-	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.currentToken.Literal)
-	p.errors = append(p.errors, msg)
-
-	return false
-}
-
-func (p *Parser) expectNextToken(expTy tokens.TokenType) bool {
-	if p.nextToken.Type == expTy {
-		return true
-	}
-
-	msg := fmt.Sprintf("Expected '%s'. Got %s", expTy, p.nextToken.Type)
-	p.errors = append(p.errors, msg)
-
-	return false
 }
 
 // Advances to the next token if equals the given token type. Generates a parsing error if
