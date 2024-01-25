@@ -30,6 +30,9 @@ func Eval(node ast.Node) objects.Object {
 
 	case *ast.PrefixExpression:
 		return evalPrefix(node)
+
+	case *ast.InfixExpression:
+		return evalInfix(node)
 	}
 
 	return nil
@@ -54,6 +57,36 @@ func evalPrefix(exp *ast.PrefixExpression) objects.Object {
 	return nil
 }
 
+// TODO: refactor mas tarde para poder con los if y las function calls
+func evalInfix(exp *ast.InfixExpression) objects.Object {
+	evalLeft := Eval(exp.Left)
+	left, ok := evalLeft.(*objects.Integer)
+	if !ok {
+		// TODO: add error messages
+		return nil
+	}
+
+	evalRight := Eval(exp.Right)
+	right, ok := evalRight.(*objects.Integer)
+	if !ok {
+		// TODO: add error messages
+		return nil
+	}
+
+	switch exp.Operator {
+	case "+":
+		return &objects.Integer{Value: left.Value + right.Value}
+    case "-":
+        return &objects.Integer{Value: left.Value - right.Value}
+    case "*":
+        return &objects.Integer{Value: left.Value * right.Value}
+    case "/":
+        return &objects.Integer{Value: left.Value / right.Value}
+	}
+
+	return nil
+}
+
 func evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 	value := Eval(exp.Right)
 
@@ -62,10 +95,10 @@ func evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 		return nil
 	}
 
-    // TODO: rethink these lines
-    if value.Inspect() == true_obj.Inspect() {
-        return false_obj
-    }
+	// TODO: rethink these lines
+	if value.Inspect() == true_obj.Inspect() {
+		return false_obj
+	}
 
 	return true_obj
 }
