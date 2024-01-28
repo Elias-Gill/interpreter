@@ -12,10 +12,30 @@ func (e *Evaluator) evalPrefix(exp *ast.PrefixExpression) objects.Object {
 	case "!":
 		return e.evalBangOperator(exp)
     case "-":
-        return e.evalMinusOperator(exp)
+        return e.evalMinusPrefix(exp)
 	}
 
 	return null_obj
+}
+
+func (e *Evaluator) evalInfix(exp *ast.InfixExpression) objects.Object {
+    evalLeft := e.eval(exp.Left)
+
+    switch evalLeft.Type() {
+    case objects.INTEGER_OBJ:
+        return e.evalArithmeticOperations(exp)
+    case objects.BOOL_OBJ:
+        return e.evalBooleanExpression(exp)
+    }
+
+    e.errors = append(e.errors,
+        fmt.Sprintf(
+            "Not supported infix operation: %s",
+            exp.Operator,
+        ),
+    )
+
+    return null_obj
 }
 
 func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
@@ -40,7 +60,7 @@ func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 	return true_obj
 }
 
-func (e *Evaluator) evalMinusOperator(exp *ast.PrefixExpression) objects.Object {
+func (e *Evaluator) evalMinusPrefix(exp *ast.PrefixExpression) objects.Object {
     value := e.eval(exp.Right)
 
     if value.Type() != objects.INTEGER_OBJ {
@@ -59,25 +79,6 @@ func (e *Evaluator) evalMinusOperator(exp *ast.PrefixExpression) objects.Object 
     return &objects.Integer{Value: -res.Value}
 }
 
-func (e *Evaluator) evalInfix(exp *ast.InfixExpression) objects.Object {
-	evalLeft := e.eval(exp.Left)
-
-	switch evalLeft.Type() {
-	case objects.INTEGER_OBJ:
-		return e.evalArithmeticOperations(exp)
-	case objects.BOOL_OBJ:
-		return e.evalBooleanExpression(exp)
-	}
-
-	e.errors = append(e.errors,
-		fmt.Sprintf(
-			"Not supported infix operation: %s",
-			exp.Operator,
-		),
-	)
-
-	return null_obj
-}
 
 func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Object {
 	left := e.eval(exp.Left).(*objects.Boolean)

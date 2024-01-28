@@ -76,7 +76,7 @@ func (e *Evaluator) eval(node ast.Node) objects.Object {
 		return false_obj
 
 	case *ast.Program:
-		return e.parseStatements(node.Statements)
+		return e.evalStatements(node.Statements)
 
 	case *ast.ExpressionStatement:
 		return e.eval(node.Expression)
@@ -91,7 +91,7 @@ func (e *Evaluator) eval(node ast.Node) objects.Object {
 		return e.evalIfExpression(node)
 
 	case *ast.BlockStatement:
-		return e.parseStatements(node.Statements)
+		return e.evalStatements(node.Statements)
 	}
 
 	e.errors = append(e.errors,
@@ -100,7 +100,7 @@ func (e *Evaluator) eval(node ast.Node) objects.Object {
 	return null_obj
 }
 
-func (e *Evaluator) parseStatements(stmts []ast.Statement) objects.Object {
+func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
 	var res objects.Object
 
 	for _, value := range stmts {
