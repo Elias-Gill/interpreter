@@ -70,7 +70,7 @@ func TestInfixArithmetic(t *testing.T) {
 	}
 }
 
-func TestInfixComparition(t *testing.T) {
+func TestInfixComparison(t *testing.T) {
 	testCases := []struct {
 		tcase    string
 		expected bool
@@ -89,6 +89,47 @@ func TestInfixComparition(t *testing.T) {
 		}
 
 		testBool(t, evaluated, tc.expected)
+	}
+}
+
+func TestIfEvaluation(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected bool
+	}{
+		{tcase: "si(-12 + 24 < -12){true}sino{false}", expected: false},
+		{tcase: "si(true){true}sino{false}", expected: true},
+		{tcase: "si(false){true}sino{false}", expected: false},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testBool(t, evaluated, tc.expected)
+	}
+}
+
+func TestReturnStatement(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected int64
+	}{
+		{tcase: "2*8;retorna 2; 2*2", expected: 2},
+		{tcase: "si(true){true};retorna 123; true", expected: 123},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testInteger(t, evaluated, tc.expected)
 	}
 }
 
@@ -158,14 +199,14 @@ func testInteger(t *testing.T, evaluated objects.Object, expected int64) bool {
 		return false
 	}
 
-	value, ok := evaluated.(*objects.Integer)
+	res, ok := evaluated.(*objects.Integer)
 	if !ok {
 		t.Errorf("Cannot parse to 'Object integer'")
 		return false
 	}
 
-	if value.Value != expected {
-		t.Errorf("Expected '1123'. Got %d", value.Value)
+	if res.Value != expected {
+		t.Errorf("Expected '%d'. Got %d", expected, res.Value)
 	}
 
 	return true

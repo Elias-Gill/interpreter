@@ -92,6 +92,10 @@ func (e *Evaluator) eval(node ast.Node) objects.Object {
 
 	case *ast.BlockStatement:
 		return e.evalStatements(node.Statements)
+
+	case *ast.ReturnStatement:
+		val := e.eval(node.ReturnValue)
+		return &objects.ReturnObject{Value: val}
 	}
 
 	e.errors = append(e.errors,
@@ -105,8 +109,11 @@ func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
 
 	for _, value := range stmts {
 		res = e.eval(value)
+
+		if returnValue, ok := res.(*objects.ReturnObject); ok {
+			return returnValue.Value
+		}
 	}
 
 	return res
 }
-

@@ -13,6 +13,7 @@ const (
 	INTEGER_OBJ = "INTEGER"
 	BOOL_OBJ    = "BOOL"
 	NULL_OBJ    = "NULL"
+	RETURN_OBJ  = "NULL"
 )
 
 // --- Object types ---
@@ -46,4 +47,15 @@ func (b *NULL) Type() ObjectType {
 }
 func (b *NULL) Inspect() string {
 	return NULL_OBJ
+}
+
+type ReturnObject struct {
+	Value Object
+}
+
+func (r *ReturnObject) Type() ObjectType {
+	return RETURN_OBJ
+}
+func (r *ReturnObject) Inspect() string {
+	return r.Value.Inspect()
 }
