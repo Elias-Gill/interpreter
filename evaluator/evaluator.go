@@ -12,7 +12,6 @@ import (
 var (
 	true_obj  = &objects.Boolean{Value: true}
 	false_obj = &objects.Boolean{Value: false}
-	null_obj  = &objects.NULL{}
 )
 
 type Evaluator struct {
@@ -91,17 +90,32 @@ func (e *Evaluator) eval(node ast.Node) objects.Object {
 		return e.evalIfExpression(node)
 
 	case *ast.BlockStatement:
-		return e.evalStatements(node.Statements)
+		return e.evalBlockStatement(node)
 
 	case *ast.ReturnStatement:
 		val := e.eval(node.ReturnValue)
 		return &objects.ReturnObject{Value: val}
 	}
 
-	e.errors = append(e.errors,
+	return objects.NewError(
 		fmt.Sprintf("Cannot evaluate node: %v", node.ToString()))
+}
 
-	return null_obj
+func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement) objects.Object {
+	var res objects.Object
+
+	for _, value := range node.Statements {
+		res = e.eval(value)
+
+		if res != nil {
+			rt := res.Type()
+			if rt == objects.RETURN_OBJ || rt == objects.ERROR_OBJ {
+				return res
+			}
+		}
+	}
+
+	return res
 }
 
 func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
@@ -110,8 +124,12 @@ func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
 	for _, value := range stmts {
 		res = e.eval(value)
 
-		if returnValue, ok := res.(*objects.ReturnObject); ok {
-			return returnValue.Value
+		switch res := res.(type) {
+		case *objects.ReturnObject:
+			return res.Value
+
+		case *objects.ErrorObject:
+			return res
 		}
 	}
 

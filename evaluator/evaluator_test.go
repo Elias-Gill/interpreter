@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/sl2.0/objects"
@@ -119,7 +120,7 @@ func TestReturnStatement(t *testing.T) {
 		expected int64
 	}{
 		{tcase: "2*8;retorna 2; 2*2", expected: 2},
-		{tcase: "si(true){true};retorna 123; true", expected: 123},
+		{tcase: "si(true){retorna 123}; true", expected: 123},
 	}
 
 	for _, tc := range testCases {
@@ -130,6 +131,37 @@ func TestReturnStatement(t *testing.T) {
 		}
 
 		testInteger(t, evaluated, tc.expected)
+	}
+}
+
+func TestEvalError(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected string
+	}{
+		{tcase: "2*true;", expected: "Expected right value of '*' to be an integer."},
+		{tcase: "true*2;", expected: "Expected right value to be a boolean."},
+		{tcase: "si(true*2){2}", expected: 
+            "Expected boolean expression for 'if' condition.\n"+
+                "\tExpected right value to be a boolean." + 
+                "\n\tGot: 2",
+        },
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		if !strings.HasPrefix(evaluated.Inspect(), tc.expected) {
+			t.Errorf(
+				"Bad message:\nExpected: \n%s\nActual: \n%s",
+				tc.expected,
+				evaluated.Inspect(),
+			)
+		}
 	}
 }
 
@@ -178,7 +210,7 @@ func parseAndEval(t *testing.T, input string) objects.Object {
 
 func testBool(t *testing.T, evaluated objects.Object, expected bool) {
 	if evaluated.Type() != objects.BOOL_OBJ {
-		t.Errorf("Expected 'Object Boolean' type. Got %s", evaluated.Type())
+		t.Errorf("Expected 'Object Boolean' type. Got %s", evaluated.Inspect())
 		return
 	}
 
@@ -195,7 +227,7 @@ func testBool(t *testing.T, evaluated objects.Object, expected bool) {
 
 func testInteger(t *testing.T, evaluated objects.Object, expected int64) bool {
 	if evaluated.Type() != objects.INTEGER_OBJ {
-		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Type())
+		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Inspect())
 		return false
 	}
 

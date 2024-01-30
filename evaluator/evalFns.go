@@ -1,8 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
-
 	"github.com/sl2.0/ast"
 	"github.com/sl2.0/objects"
 )
@@ -11,45 +9,33 @@ func (e *Evaluator) evalPrefix(exp *ast.PrefixExpression) objects.Object {
 	switch exp.Operator {
 	case "!":
 		return e.evalBangOperator(exp)
-    case "-":
-        return e.evalMinusPrefix(exp)
+	case "-":
+		return e.evalMinusPrefix(exp)
 	}
 
-	return null_obj
+	return objects.NewError("Prefix operation not supported: %s", exp.Operator)
 }
 
 func (e *Evaluator) evalInfix(exp *ast.InfixExpression) objects.Object {
-    evalLeft := e.eval(exp.Left)
+	evalLeft := e.eval(exp.Left)
 
-    switch evalLeft.Type() {
-    case objects.INTEGER_OBJ:
-        return e.evalArithmeticOperations(exp)
-    case objects.BOOL_OBJ:
-        return e.evalBooleanExpression(exp)
-    }
+	switch evalLeft.Type() {
+	case objects.INTEGER_OBJ:
+		return e.evalArithmeticOperations(exp)
+	case objects.BOOL_OBJ:
+		return e.evalBooleanExpression(exp)
+	}
 
-    e.errors = append(e.errors,
-        fmt.Sprintf(
-            "Not supported infix operation: %s",
-            exp.Operator,
-        ),
-    )
-
-    return null_obj
+	return objects.NewError("Not supported infix operation: %s", exp.Operator)
 }
 
 func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 	value := e.eval(exp.Right)
 
 	if value.Type() != objects.BOOL_OBJ {
-		e.errors = append(e.errors,
-			fmt.Sprintf(
-				"Expected boolean expression for '!' operator. \nGot: %v",
-				value.Type(),
-			),
-		)
-
-		return null_obj
+		return objects.NewError(
+			"Expected boolean expression for '!' operator. \n\tGot: %v",
+			value.Inspect())
 	}
 
 	// we can compare object references because we have static true and false
@@ -61,24 +47,18 @@ func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 }
 
 func (e *Evaluator) evalMinusPrefix(exp *ast.PrefixExpression) objects.Object {
-    value := e.eval(exp.Right)
+	value := e.eval(exp.Right)
 
-    if value.Type() != objects.INTEGER_OBJ {
-        e.errors = append(e.errors,
-            fmt.Sprintf(
-                "Expected integer expression for '-' operator. \nGot: %v",
-                value.Type(),
-            ),
-        )
+	if value.Type() != objects.INTEGER_OBJ {
+		return objects.NewError(
+			"Expected integer expression for '-' operator. \n\tGot: %v",
+			value.Inspect())
+	}
 
-        return null_obj
-    }
+	res := value.(*objects.Integer)
 
-    res := value.(*objects.Integer)
-
-    return &objects.Integer{Value: -res.Value}
+	return &objects.Integer{Value: -res.Value}
 }
-
 
 func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Object {
 	left := e.eval(exp.Left).(*objects.Boolean)
@@ -86,14 +66,9 @@ func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Obje
 	evalRight := e.eval(exp.Right)
 
 	if evalRight.Type() != objects.BOOL_OBJ {
-		e.errors = append(e.errors,
-			fmt.Sprintf(
-				"Expected right value on infix to be a boolean. \nGot: %v",
-				string(evalRight.Type()),
-			),
-		)
-
-		return null_obj
+		return objects.NewError(
+			"Expected right value to be a boolean.\n\tGot: %v",
+			evalRight.Inspect())
 	}
 
 	right := evalRight.(*objects.Boolean)
@@ -105,14 +80,9 @@ func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Obje
 		return &objects.Boolean{Value: left.Value != right.Value}
 	}
 
-	e.errors = append(e.errors,
-		fmt.Sprintf(
-			"Not supported operator: %s",
-			exp.Operator,
-		),
-	)
-
-	return null_obj
+	return objects.NewError(
+		"Not supported operator: %s",
+		exp.Operator)
 }
 
 func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression) objects.Object {
@@ -121,14 +91,9 @@ func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression) objects.O
 	evalRight := e.eval(exp.Right)
 
 	if evalRight.Type() != objects.INTEGER_OBJ {
-		e.errors = append(e.errors,
-			fmt.Sprintf(
-				"Expected right value of '%s' to be an integer. \nGot: %v",
-				exp.Operator, string(evalRight.Type()),
-			),
-		)
-
-		return null_obj
+		return objects.NewError(
+			"Expected right value of '%s' to be an integer. \n\tGot: %v",
+			exp.Operator, evalRight.Inspect())
 	}
 
 	right := evalRight.(*objects.Integer)
@@ -146,34 +111,26 @@ func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression) objects.O
 		return selectBoolObject(left.Value > right.Value)
 	case "<":
 		return selectBoolObject(left.Value < right.Value)
-    case "==":
+	case "==":
 		return selectBoolObject(left.Value == right.Value)
-    case "!=":
+	case "!=":
 		return selectBoolObject(left.Value != right.Value)
 	}
 
-	e.errors = append(e.errors,
-		fmt.Sprintf(
-			"Not supported operator: %s",
-			exp.Operator,
-		),
+	return objects.NewError(
+		"Not supported operator: %s",
+		exp.Operator,
 	)
-
-	return null_obj
 }
 
 func (e *Evaluator) evalIfExpression(exp *ast.IfExpression) objects.Object {
 	condition := e.eval(exp.Condition)
 
 	if condition.Type() != objects.BOOL_OBJ {
-		e.errors = append(e.errors,
-			fmt.Sprintf(
-				"Expected boolean expression for 'if' condition. \nGot: %v",
-				condition.Type(),
-			),
+		return objects.NewError(
+			"Expected boolean expression for 'if' condition.\n\t%v",
+			condition.Inspect(),
 		)
-
-		return null_obj
 	}
 
 	if condition == true_obj {
@@ -184,13 +141,13 @@ func (e *Evaluator) evalIfExpression(exp *ast.IfExpression) objects.Object {
 		return e.eval(exp.Alternative)
 	}
 
-	return null_obj
+	return nil
 }
 
 func selectBoolObject(exp bool) *objects.Boolean {
-    if exp {
-        return true_obj
-    }
+	if exp {
+		return true_obj
+	}
 
-    return false_obj
+	return false_obj
 }

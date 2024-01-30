@@ -13,6 +13,7 @@ const (
 	INTEGER_OBJ = "INTEGER"
 	BOOL_OBJ    = "BOOL"
 	NULL_OBJ    = "NULL"
+	ERROR_OBJ   = "ERROR"
 	RETURN_OBJ  = "NULL"
 )
 
@@ -40,13 +41,20 @@ func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%v", b.Value)
 }
 
-type NULL struct{}
-
-func (b *NULL) Type() ObjectType {
-	return NULL_OBJ
+type ErrorObject struct {
+	error string
 }
-func (b *NULL) Inspect() string {
-	return NULL_OBJ
+
+func (b *ErrorObject) Type() ObjectType {
+	return ERROR_OBJ
+}
+
+func NewError(format string, message ...interface{}) Object {
+	return &ErrorObject{error: fmt.Sprintf(format, message...)}
+}
+
+func (b *ErrorObject) Inspect() string {
+	return b.error
 }
 
 type ReturnObject struct {

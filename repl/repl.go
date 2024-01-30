@@ -60,7 +60,7 @@ func StartLiveParser(in io.Reader, out io.Writer) {
 		program := p.ParseProgram()
 
 		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
+			printErrors(out, p.Errors())
 			continue
 		}
 
@@ -90,7 +90,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 		program := p.ParseProgram()
 
 		if p.HasErrors() {
-			printParserErrors(out, p.Errors())
+			printErrors(out, p.Errors())
 			continue
 		}
 
@@ -99,7 +99,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 		evaluated := ev.EvalProgram()
 
         if ev.HasErrors() {
-            printParserErrors(out, ev.Errors())
+            printErrors(out, ev.Errors())
             continue
         }
 
@@ -112,7 +112,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 	}
 }
 
-func printParserErrors(out io.Writer, errors []string) {
+func printErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")
 	}
