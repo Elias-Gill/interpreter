@@ -63,11 +63,17 @@ func (e *Evaluator) EvalProgram() objects.Object {
 	return e.eval(e.program)
 }
 
+/*
+eval evaluates every statement or expression within the program recursivelly
+
+eval recieves an storage environment, which is ONLY local to the execution scope.
+So there are no global values. For statements scope dependant (like functions or for loops),
+a new env has to be created an passed to the eval function.
+*/
 func (e *Evaluator) eval(node ast.Node) objects.Object {
 	switch node := node.(type) {
 	case *ast.IntegerLiteral:
 		return &objects.Integer{Value: node.Value}
-
 	case *ast.Boolean:
 		if node.Token.Type == tokens.TRUE {
 			return true_obj

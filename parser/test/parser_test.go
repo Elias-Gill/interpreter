@@ -409,7 +409,7 @@ func TestFuncExpression(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.VarStatement")
 	}
 
-	exp, ok := stmt.Value.(*ast.FunctionLiteral)
+	exp, ok := stmt.Value.(*ast.AnonymousFunction)
 	if !ok {
 		t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
 	}

@@ -11,7 +11,7 @@ func TestString(t *testing.T) {
 		Statements: []Statement{
 			&VarStatement{
 				Token: tokens.Token{Type: tokens.VAR, Literal: "let"},
-				Ident: &Identifier{
+				Identifier: &Identifier{
 					Token: tokens.Token{Type: tokens.IDENT, Literal: "myVar"},
 					Value: "myVar",
 				},

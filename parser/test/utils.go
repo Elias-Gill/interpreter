@@ -132,8 +132,8 @@ func testVar(t *testing.T, exp ast.Statement, identifier string, value interface
 		return
 	}
 
-	if v.Ident.Value != identifier {
-		t.Errorf("Expected value %s. Got: %s", identifier, v.Ident.Value)
+	if v.Identifier.Value != identifier {
+		t.Errorf("Expected value %s. Got: %s", identifier, v.Identifier.Value)
 		return
 	}
 

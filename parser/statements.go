@@ -54,7 +54,7 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		return nil
 	}
 
-	stmt.Ident = ast.NewIdentifier(p.currentToken)
+	stmt.Identifier = ast.NewIdentifier(p.currentToken)
 
 	if !p.advanceIfNextToken(tokens.ASIGN) {
 		return nil

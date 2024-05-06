@@ -10,7 +10,7 @@ import (
 )
 
 type VarStatement struct {
-	Ident *Identifier
+	Identifier *Identifier
 	Value Expression
 	Token tokens.Token
 }
@@ -23,7 +23,7 @@ func (v *VarStatement) ToString() string {
 	var out bytes.Buffer
 
 	out.WriteString(v.TokenLiteral() + " ")
-	out.WriteString(v.Ident.ToString())
+	out.WriteString(v.Identifier.ToString())
 	out.WriteString(" = ")
 
 	if v.Value != nil {

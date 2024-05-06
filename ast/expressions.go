@@ -53,6 +53,25 @@ func (i *IntegerLiteral) ToString() string {
 	return i.TokenLiteral()
 }
 
+type StringLiteral struct {
+	Value string
+	Token tokens.Token
+}
+
+func NewString(t tokens.Token) *StringLiteral {
+	return &StringLiteral{
+		Value: t.Literal,
+		Token: t,
+	}
+}
+func (i *StringLiteral) expressionNode() {}
+func (i *StringLiteral) TokenLiteral() string {
+	return i.Token.Literal
+}
+func (i *StringLiteral) ToString() string {
+	return i.TokenLiteral()
+}
+
 type PrefixExpression struct {
 	Right    Expression
 	Operator string
@@ -151,23 +170,23 @@ func (i *IfExpression) ToString() string {
 }
 
 // Unnamed functions
-type FunctionLiteral struct {
+type AnonymousFunction struct {
 	Paramenters []*Identifier
 	Body        *BlockStatement
 	Token       tokens.Token
 }
 
-func NewFunctionLiteral(t tokens.Token) *FunctionLiteral {
-	return &FunctionLiteral{
+func NewFunctionLiteral(t tokens.Token) *AnonymousFunction {
+	return &AnonymousFunction{
 		Token: t,
 	}
 }
 
-func (f *FunctionLiteral) expressionNode() {}
-func (f *FunctionLiteral) TokenLiteral() string {
+func (f *AnonymousFunction) expressionNode() {}
+func (f *AnonymousFunction) TokenLiteral() string {
 	return f.Token.Literal
 }
-func (f *FunctionLiteral) ToString() string {
+func (f *AnonymousFunction) ToString() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(f.TokenLiteral())
