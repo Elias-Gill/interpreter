@@ -141,11 +141,10 @@ func TestEvalError(t *testing.T) {
 	}{
 		{tcase: "2*true;", expected: "Expected right value of '*' to be an integer."},
 		{tcase: "true*2;", expected: "Expected right value to be a boolean."},
-		{tcase: "si(true*2){2}", expected: 
-            "Expected boolean expression for 'if' condition.\n"+
-                "\tExpected right value to be a boolean." + 
-                "\n\tGot: 2",
-        },
+		{tcase: "si(true*2){2}", expected: "Expected boolean expression for 'if' condition.\n" +
+			"\tExpected right value to be a boolean." +
+			"\n\tGot: 2",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -165,7 +164,54 @@ func TestEvalError(t *testing.T) {
 	}
 }
 
+func TestEvalIdentifier(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected int64
+	}{
+		{tcase: "var nuevo=2; nuevo", expected: 2},
+		{tcase: "var a=3; a*2;", expected: 6},
+		{tcase: "var a=3; var b=4; a+b;", expected: 7},
+	}
+
+	for _, tt := range testCases {
+		testInteger(t, parseAndEval(t, tt.tcase), tt.expected)
+	}
+}
+
 // --- Testing utils ---
+
+func testBool(t *testing.T, evaluated objects.Object, expected bool) {
+	if evaluated.Type() != objects.BOOL_OBJ {
+		t.Errorf("Expected 'Object Boolean' type. Got %s", evaluated.Inspect())
+		return
+	}
+
+	value, ok := evaluated.(*objects.Boolean)
+	if !ok {
+		t.Errorf("Cannot parse to 'Object integer'")
+		return
+	}
+
+	if value.Value != expected {
+		t.Errorf("Expected '%v'. Got %v", expected, value.Value)
+	}
+}
+
+func testInteger(t *testing.T, evaluated objects.Object, expected int64) {
+	if evaluated.Type() != objects.INTEGER_OBJ {
+		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Inspect())
+	}
+
+	res, ok := evaluated.(*objects.Integer)
+	if !ok {
+		t.Errorf("Cannot parse to 'Object integer'")
+	}
+
+	if res.Value != expected {
+		t.Errorf("Expected '%d'. Got %d", expected, res.Value)
+	}
+}
 
 func parseAndEval(t *testing.T, input string) objects.Object {
 	const colorMagenta = "\033[35m"
@@ -206,40 +252,4 @@ func parseAndEval(t *testing.T, input string) objects.Object {
 	}
 
 	return evaluated
-}
-
-func testBool(t *testing.T, evaluated objects.Object, expected bool) {
-	if evaluated.Type() != objects.BOOL_OBJ {
-		t.Errorf("Expected 'Object Boolean' type. Got %s", evaluated.Inspect())
-		return
-	}
-
-	value, ok := evaluated.(*objects.Boolean)
-	if !ok {
-		t.Errorf("Cannot parse to 'Object integer'")
-		return
-	}
-
-	if value.Value != expected {
-		t.Errorf("Expected '%v'. Got %v", expected, value.Value)
-	}
-}
-
-func testInteger(t *testing.T, evaluated objects.Object, expected int64) bool {
-	if evaluated.Type() != objects.INTEGER_OBJ {
-		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Inspect())
-		return false
-	}
-
-	res, ok := evaluated.(*objects.Integer)
-	if !ok {
-		t.Errorf("Cannot parse to 'Object integer'")
-		return false
-	}
-
-	if res.Value != expected {
-		t.Errorf("Expected '%d'. Got %d", expected, res.Value)
-	}
-
-	return true
 }

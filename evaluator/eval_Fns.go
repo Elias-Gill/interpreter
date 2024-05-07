@@ -2,35 +2,36 @@ package evaluator
 
 import (
 	"github.com/sl2.0/ast"
+	"github.com/sl2.0/evaluator/storage"
 	"github.com/sl2.0/objects"
 )
 
-func (e *Evaluator) evalPrefix(exp *ast.PrefixExpression) objects.Object {
+func (e *Evaluator) evalPrefix(exp *ast.PrefixExpression, env *storage.Env) objects.Object {
 	switch exp.Operator {
 	case "!":
-		return e.evalBangOperator(exp)
+		return e.evalBangOperator(exp, env)
 	case "-":
-		return e.evalMinusPrefix(exp)
+		return e.evalMinusPrefix(exp, env)
 	}
 
 	return objects.NewError("Prefix operation not supported: %s", exp.Operator)
 }
 
-func (e *Evaluator) evalInfix(exp *ast.InfixExpression) objects.Object {
-	evalLeft := e.eval(exp.Left)
+func (e *Evaluator) evalInfix(exp *ast.InfixExpression, env *storage.Env) objects.Object {
+	evalLeft := e.eval(exp.Left, env)
 
 	switch evalLeft.Type() {
 	case objects.INTEGER_OBJ:
-		return e.evalArithmeticOperations(exp)
+		return e.evalArithmeticOperations(exp, env)
 	case objects.BOOL_OBJ:
-		return e.evalBooleanExpression(exp)
+		return e.evalBooleanExpression(exp, env)
 	}
 
 	return objects.NewError("Not supported infix operation: %s", exp.Operator)
 }
 
-func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
-	value := e.eval(exp.Right)
+func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression, env *storage.Env) objects.Object {
+	value := e.eval(exp.Right, env)
 
 	if value.Type() != objects.BOOL_OBJ {
 		return objects.NewError(
@@ -46,8 +47,8 @@ func (e *Evaluator) evalBangOperator(exp *ast.PrefixExpression) objects.Object {
 	return true_obj
 }
 
-func (e *Evaluator) evalMinusPrefix(exp *ast.PrefixExpression) objects.Object {
-	value := e.eval(exp.Right)
+func (e *Evaluator) evalMinusPrefix(exp *ast.PrefixExpression, env *storage.Env) objects.Object {
+	value := e.eval(exp.Right, env)
 
 	if value.Type() != objects.INTEGER_OBJ {
 		return objects.NewError(
@@ -60,10 +61,10 @@ func (e *Evaluator) evalMinusPrefix(exp *ast.PrefixExpression) objects.Object {
 	return &objects.Integer{Value: -res.Value}
 }
 
-func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Object {
-	left := e.eval(exp.Left).(*objects.Boolean)
+func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression, env *storage.Env) objects.Object {
+	left := e.eval(exp.Left, env).(*objects.Boolean)
 
-	evalRight := e.eval(exp.Right)
+	evalRight := e.eval(exp.Right, env)
 
 	if evalRight.Type() != objects.BOOL_OBJ {
 		return objects.NewError(
@@ -85,10 +86,10 @@ func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression) objects.Obje
 		exp.Operator)
 }
 
-func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression) objects.Object {
-	left := e.eval(exp.Left).(*objects.Integer)
+func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression, env *storage.Env) objects.Object {
+	left := e.eval(exp.Left, env).(*objects.Integer)
 
-	evalRight := e.eval(exp.Right)
+	evalRight := e.eval(exp.Right, env)
 
 	if evalRight.Type() != objects.INTEGER_OBJ {
 		return objects.NewError(
@@ -123,8 +124,8 @@ func (e *Evaluator) evalArithmeticOperations(exp *ast.InfixExpression) objects.O
 	)
 }
 
-func (e *Evaluator) evalIfExpression(exp *ast.IfExpression) objects.Object {
-	condition := e.eval(exp.Condition)
+func (e *Evaluator) evalIfExpression(exp *ast.IfExpression, env *storage.Env) objects.Object {
+	condition := e.eval(exp.Condition, env)
 
 	if condition.Type() != objects.BOOL_OBJ {
 		return objects.NewError(
@@ -134,11 +135,11 @@ func (e *Evaluator) evalIfExpression(exp *ast.IfExpression) objects.Object {
 	}
 
 	if condition == true_obj {
-		return e.eval(exp.Consequence)
+		return e.eval(exp.Consequence, env)
 	}
 
 	if exp.Alternative != nil {
-		return e.eval(exp.Alternative)
+		return e.eval(exp.Alternative, env)
 	}
 
 	return nil

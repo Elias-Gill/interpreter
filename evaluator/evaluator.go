@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sl2.0/ast"
+	"github.com/sl2.0/evaluator/storage"
 	"github.com/sl2.0/objects"
 	"github.com/sl2.0/parser"
 	"github.com/sl2.0/tokens"
@@ -59,8 +60,8 @@ func (e *Evaluator) HasErrors() bool {
 	return len(e.errors) != 0
 }
 
-func (e *Evaluator) EvalProgram() objects.Object {
-	return e.eval(e.program)
+func (e *Evaluator) EvalProgram(env *storage.Env) objects.Object {
+	return e.eval(e.program, env)
 }
 
 /*
@@ -70,48 +71,66 @@ eval recieves an storage environment, which is ONLY local to the execution scope
 So there are no global values. For statements scope dependant (like functions or for loops),
 a new env has to be created an passed to the eval function.
 */
-func (e *Evaluator) eval(node ast.Node) objects.Object {
+func (e *Evaluator) eval(node ast.Node, env *storage.Env) objects.Object {
 	switch node := node.(type) {
+	case *ast.Program:
+		return e.evalStatements(node.Statements, env)
+
+		// -- Statements
+	case *ast.ExpressionStatement:
+		return e.eval(node.Expression, env)
+
+	case *ast.VarStatement:
+		val := e.eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+
+		return env.Set(node.Identifier.Value, val)
+
+	case *ast.Identifier:
+		val, ok := env.Get(node.Value)
+		if !ok {
+			return objects.NewError("Cannot resolve identifier: " + node.Value)
+		}
+		return val
+
+	case *ast.BlockStatement:
+		return e.evalBlockStatement(node, env)
+
+	case *ast.ReturnStatement:
+		val := e.eval(node.ReturnValue, env)
+		return &objects.ReturnObject{Value: val}
+
+		// -- Expressions
+	case *ast.PrefixExpression:
+		return e.evalPrefix(node, env)
+
+	case *ast.InfixExpression:
+		return e.evalInfix(node, env)
+
+	case *ast.IfExpression:
+		return e.evalIfExpression(node, env)
+
 	case *ast.IntegerLiteral:
 		return &objects.Integer{Value: node.Value}
+
 	case *ast.Boolean:
 		if node.Token.Type == tokens.TRUE {
 			return true_obj
 		}
 		return false_obj
-
-	case *ast.Program:
-		return e.evalStatements(node.Statements)
-
-	case *ast.ExpressionStatement:
-		return e.eval(node.Expression)
-
-	case *ast.PrefixExpression:
-		return e.evalPrefix(node)
-
-	case *ast.InfixExpression:
-		return e.evalInfix(node)
-
-	case *ast.IfExpression:
-		return e.evalIfExpression(node)
-
-	case *ast.BlockStatement:
-		return e.evalBlockStatement(node)
-
-	case *ast.ReturnStatement:
-		val := e.eval(node.ReturnValue)
-		return &objects.ReturnObject{Value: val}
 	}
 
 	return objects.NewError(
 		fmt.Sprintf("Cannot evaluate node: %v", node.ToString()))
 }
 
-func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement) objects.Object {
+func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *storage.Env) objects.Object {
 	var res objects.Object
 
 	for _, value := range node.Statements {
-		res = e.eval(value)
+		res = e.eval(value, env)
 
 		if res != nil {
 			rt := res.Type()
@@ -124,11 +143,11 @@ func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement) objects.Object 
 	return res
 }
 
-func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
+func (e *Evaluator) evalStatements(stmts []ast.Statement, env *storage.Env) objects.Object {
 	var res objects.Object
 
 	for _, value := range stmts {
-		res = e.eval(value)
+		res = e.eval(value, env)
 
 		switch res := res.(type) {
 		case *objects.ReturnObject:
@@ -140,4 +159,22 @@ func (e *Evaluator) evalStatements(stmts []ast.Statement) objects.Object {
 	}
 
 	return res
+}
+
+func isError(obj objects.Object) bool {
+	if obj != nil {
+		rt := obj.Type()
+		return rt == objects.ERROR_OBJ
+	}
+
+	return false
+}
+
+func isReturn(obj objects.Object) bool {
+	if obj != nil {
+		rt := obj.Type()
+		return rt == objects.RETURN_OBJ
+	}
+
+	return false
 }

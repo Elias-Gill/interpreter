@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/sl2.0/evaluator"
+	"github.com/sl2.0/evaluator/storage"
 	"github.com/sl2.0/lexer"
 	"github.com/sl2.0/parser"
 	"github.com/sl2.0/tokens"
@@ -72,6 +73,7 @@ func StartLiveParser(in io.Reader, out io.Writer) {
 // Starts a new REPL
 func StartREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := storage.NewEnv()
 
 	for {
 		fmt.Print("\n>>> ")
@@ -96,12 +98,12 @@ func StartREPL(in io.Reader, out io.Writer) {
 
 		ev := evaluator.NewFromProgram(program)
 
-		evaluated := ev.EvalProgram()
+		evaluated := ev.EvalProgram(env)
 
-        if ev.HasErrors() {
-            printErrors(out, ev.Errors())
-            continue
-        }
+		if ev.HasErrors() {
+			printErrors(out, ev.Errors())
+			continue
+		}
 
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
