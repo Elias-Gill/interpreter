@@ -169,14 +169,13 @@ func (i *IfExpression) ToString() string {
 	return buffer.String()
 }
 
-// Unnamed functions
 type AnonymousFunction struct {
 	Paramenters []*Identifier
 	Body        *BlockStatement
 	Token       tokens.Token
 }
 
-func NewFunctionLiteral(t tokens.Token) *AnonymousFunction {
+func NewAnonymousFunction(t tokens.Token) *AnonymousFunction {
 	return &AnonymousFunction{
 		Token: t,
 	}
@@ -202,16 +201,49 @@ func (f *AnonymousFunction) ToString() string {
 	return buffer.String()
 }
 
+type FunctionLiteral struct {
+	Paramenters []*Identifier
+	Body        *BlockStatement
+	Identifier  *Identifier
+	Token       tokens.Token
+}
+
+func NewFunctionLiteral(t tokens.Token) *FunctionLiteral {
+	return &FunctionLiteral{
+		Token:      t,
+	}
+}
+
+func (f *FunctionLiteral) expressionNode() {}
+func (f *FunctionLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionLiteral) ToString() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(f.TokenLiteral())
+	buffer.WriteString("(")
+
+	for _, v := range f.Paramenters {
+		buffer.WriteString(v.ToString() + ", ")
+	}
+
+	buffer.WriteString(")")
+	buffer.WriteString(f.Body.ToString())
+
+	return buffer.String()
+}
+
 type FunctionCall struct {
-	Arguments []Expression
-	Ident     Expression
-	Token     tokens.Token
+	Arguments  []Expression
+	Identifier Expression
+	Token      tokens.Token
 }
 
 func NewFunctionCall(t tokens.Token, i Expression) *FunctionCall {
 	return &FunctionCall{
-		Token: t,
-		Ident: i,
+		Token:      t,
+		Identifier: i,
 	}
 }
 
@@ -222,7 +254,7 @@ func (f *FunctionCall) TokenLiteral() string {
 func (f *FunctionCall) ToString() string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(f.Ident.ToString())
+	buffer.WriteString(f.Identifier.ToString())
 	buffer.WriteString(f.TokenLiteral())
 
 	for i := 0; i < len(f.Arguments)-1; i++ {

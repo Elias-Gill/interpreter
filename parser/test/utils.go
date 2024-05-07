@@ -139,3 +139,18 @@ func testVar(t *testing.T, exp ast.Statement, identifier string, value interface
 
 	testLiteralExpression(t, v.Value, value)
 }
+
+func testReturnFunc(t *testing.T, stmt ast.Statement, expectedValue interface{}) {
+	// try to convert to type ReturnStatement
+	if stmt.TokenLiteral() != "retorna" {
+		t.Errorf("Expected return statement\n\tGot: %v",
+			stmt.TokenLiteral())
+	}
+
+	ret, ok := stmt.(*ast.ReturnStatement)
+	if !ok {
+		t.Errorf("Cannot convert statement to ast.ReturnStatement")
+	}
+
+	testLiteralExpression(t, ret.ReturnValue, expectedValue)
+}

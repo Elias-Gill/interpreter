@@ -88,7 +88,7 @@ func (parser *Parser) InitParsingFns() {
 	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
 	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)
 	parser.registerPrefixFn(tokens.IF, parser.parseIfExpression)
-	parser.registerPrefixFn(tokens.FUNCTION, parser.parseFunctionLiteral)
+	parser.registerPrefixFn(tokens.FUNCTION, parser.parseAnonymousFunction)
 	parser.registerPrefixFn(tokens.FOR, parser.parseForLoop)
 
 	parser.registerInfixFn(tokens.MINUS, parser.parseInfixExpression)

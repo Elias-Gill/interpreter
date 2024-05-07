@@ -128,8 +128,10 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 func (p *Parser) parseFuncParameters() []*ast.Identifier {
 	var params []*ast.Identifier
 
-	// jump "("
-	p.advanceToken()
+	// jump the "("
+	if !p.advanceIfCurToken(tokens.LPAR) {
+		return nil
+	}
 
 	for !p.curTokenIs(tokens.RPAR) {
 		ident := ast.NewIdentifier(p.currentToken)

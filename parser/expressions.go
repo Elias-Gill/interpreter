@@ -98,6 +98,41 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	f := ast.NewFunctionLiteral(p.currentToken)
 
+	if !p.advanceIfNextToken(tokens.IDENT) {
+		return nil
+	}
+
+	f.Identifier = ast.NewIdentifier(p.currentToken)
+
+	if !p.advanceIfNextToken(tokens.LPAR) {
+		return nil
+	}
+
+	params := p.parseFuncParameters()
+	if params == nil {
+		return nil
+	}
+
+	f.Paramenters = params
+
+	body := p.parseBlockStatement()
+	if body == nil {
+		return nil
+	}
+
+	f.Body = body
+
+	return f
+}
+
+func (p *Parser) parseAnonymousFunction() ast.Expression {
+	// annonymous functions dont have an identifier
+	if p.nextTokenIs(tokens.IDENT) {
+		return p.parseFunctionLiteral()
+	}
+
+	f := ast.NewAnonymousFunction(p.currentToken)
+
 	if !p.advanceIfNextToken(tokens.LPAR) {
 		return nil
 	}
@@ -192,7 +227,7 @@ func (p *Parser) parseForLoop() ast.Expression {
 		return nil
 	}
 
-    exp.Iterations = *ast.NewInteger(p.currentToken)
+	exp.Iterations = *ast.NewInteger(p.currentToken)
 
 	if !p.advanceIfNextToken(tokens.LBRAC) {
 		p.errors = append(p.errors, "Missing opening '{' on for loop body")

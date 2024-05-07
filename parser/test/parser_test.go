@@ -72,21 +72,7 @@ func TestReturn(t *testing.T) {
 			t.Fatalf("Number of statements found: %d", len(p.Statements))
 		}
 
-		// try to convert to type ReturnStatement
-		stmt := p.Statements[0]
-
-		if stmt.TokenLiteral() != "retorna" {
-			t.Errorf("Expected return statement\n\tGot: %v",
-				stmt.TokenLiteral())
-			continue
-		}
-
-		ret, ok := stmt.(*ast.ReturnStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ReturnStatement")
-		}
-
-		testLiteralExpression(t, ret.ReturnValue, tc.expectedValue)
+		testReturnFunc(t, p.Statements[0], tc.expectedValue)
 	}
 }
 
@@ -349,14 +335,16 @@ func TestIfExpression(t *testing.T) {
 
 // Named functions
 func TestFuncStatement(t *testing.T) {
-	input := `func funcion_nueva(x, y) {
-    var nuevo = 33;
-    }`
-	param_list := []string{"x", "y"}
+	input := `func funcion_nueva() {
+        retorna 33;
+    }
+    var nuevo = 2;
+    `
+	param_list := []string{}
 
 	p := generateProgram(t, input)
 
-	if len(p.Statements) != 1 {
+	if len(p.Statements) != 2 {
 		t.Fatalf("Number of statements found: %d", len(p.Statements))
 	}
 
@@ -364,28 +352,30 @@ func TestFuncStatement(t *testing.T) {
 		t.Fatalf("Expected 'func'. Got: %v", p.Statements[0].TokenLiteral())
 	}
 
-	stmt, ok := p.Statements[0].(*ast.FunctionStatement)
+	fun, ok := p.Statements[0].(*ast.FunctionStatement)
 	if !ok {
 		t.Fatalf("Cannot convert statement to ast.FunctionStatement")
 	}
 
-	testIdentifier(t, stmt.Identifier, "funcion_nueva")
+	testIdentifier(t, fun.Identifier, "funcion_nueva")
 
-	if len(stmt.Paramenters) != 2 {
-		t.Fatalf("Expected 2 parameters. Got %v", len(stmt.Paramenters))
+	if len(fun.Paramenters) != len(param_list) {
+		t.Fatalf("Expected 0 parameters. Got %v", len(fun.Paramenters))
 	}
 
-	for i, v := range stmt.Paramenters {
+	for i, v := range fun.Paramenters {
 		if v.Value != param_list[i] {
-			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", v.Value)
+			t.Errorf("Expected parameter name '%s'. Got: %s", v.Value, param_list[i])
 		}
 	}
 
-	if stmt.Body == nil {
+	if fun.Body == nil {
 		t.Fatalf("Empty function body")
 	}
 
-	testVar(t, stmt.Body.Statements[0], "nuevo", 33)
+	testReturnFunc(t, fun.Body.Statements[0], 33)
+
+	testVar(t, p.Statements[1], "nuevo", 2)
 }
 
 func TestFuncExpression(t *testing.T) {
@@ -470,8 +460,8 @@ func TestFuncCall(t *testing.T) {
 			t.Fatalf("Cannot convert statement to ast.FunctionCall")
 		}
 
-		if exp.Ident.ToString() != "new_function" {
-			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Ident.ToString())
+		if exp.Identifier.ToString() != "new_function" {
+			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Identifier.ToString())
 		}
 
 		if len(exp.Arguments) != 2 {
@@ -510,13 +500,13 @@ func TestForLoop(t *testing.T) {
 	}
 
 	exp, ok := stmt.Expression.(*ast.ForLoop)
-    if !ok {
-        t.Fatalf("Cannot convert statement to ast.ForLoop")
-    }
+	if !ok {
+		t.Fatalf("Cannot convert statement to ast.ForLoop")
+	}
 
-    if exp.Iterations.Value != 2 {
-        t.Fatalf("Expected value for iterations to be '2'. Got %v", exp.Iterations.Value)
-    }
+	if exp.Iterations.Value != 2 {
+		t.Fatalf("Expected value for iterations to be '2'. Got %v", exp.Iterations.Value)
+	}
 
 	if len(exp.Body.Statements) != 1 {
 		t.Fatalf("Expected 1 statement on for loop body. Got %v", len(exp.Body.Statements))
@@ -526,5 +516,5 @@ func TestForLoop(t *testing.T) {
 		t.Fatalf("Empty function body")
 	}
 
-    testVar(t, exp.Body.Statements[0], "nuevo", 33)
+	testVar(t, exp.Body.Statements[0], "nuevo", 33)
 }

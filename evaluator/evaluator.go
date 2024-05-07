@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/sl2.0/ast"
-	"github.com/sl2.0/evaluator/storage"
 	"github.com/sl2.0/objects"
 	"github.com/sl2.0/parser"
 	"github.com/sl2.0/tokens"
@@ -60,23 +59,23 @@ func (e *Evaluator) HasErrors() bool {
 	return len(e.errors) != 0
 }
 
-func (e *Evaluator) EvalProgram(env *storage.Env) objects.Object {
+func (e *Evaluator) EvalProgram(env *objects.Storage) objects.Object {
 	return e.eval(e.program, env)
 }
 
 /*
 eval evaluates every statement or expression within the program recursivelly
 
-eval recieves an storage environment, which is ONLY local to the execution scope.
+eval recieves an storage environment, which is local to the execution scope.
 So there are no global values. For statements scope dependant (like functions or for loops),
 a new env has to be created an passed to the eval function.
 */
-func (e *Evaluator) eval(node ast.Node, env *storage.Env) objects.Object {
+func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 	switch node := node.(type) {
 	case *ast.Program:
 		return e.evalStatements(node.Statements, env)
 
-		// -- Statements
+		// -- Statements --
 	case *ast.ExpressionStatement:
 		return e.eval(node.Expression, env)
 
@@ -95,6 +94,26 @@ func (e *Evaluator) eval(node ast.Node, env *storage.Env) objects.Object {
 		}
 		return val
 
+	case *ast.FunctionStatement:
+		f := &objects.FunctionObject{
+			Parameters: node.Paramenters,
+			Body:       node.Body,
+		}
+
+		env.Set(node.Identifier.Value, f)
+
+		return f
+
+	case *ast.AnonymousFunction:
+		f := &objects.FunctionObject{
+			Parameters: node.Paramenters,
+			Body:       node.Body,
+		}
+		return f
+
+	case *ast.FunctionCall:
+		return e.evalFunctionCall(node, env)
+
 	case *ast.BlockStatement:
 		return e.evalBlockStatement(node, env)
 
@@ -102,7 +121,7 @@ func (e *Evaluator) eval(node ast.Node, env *storage.Env) objects.Object {
 		val := e.eval(node.ReturnValue, env)
 		return &objects.ReturnObject{Value: val}
 
-		// -- Expressions
+		// -- Expressions --
 	case *ast.PrefixExpression:
 		return e.evalPrefix(node, env)
 
@@ -126,7 +145,7 @@ func (e *Evaluator) eval(node ast.Node, env *storage.Env) objects.Object {
 		fmt.Sprintf("Cannot evaluate node: %v", node.ToString()))
 }
 
-func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *storage.Env) objects.Object {
+func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *objects.Storage) objects.Object {
 	var res objects.Object
 
 	for _, value := range node.Statements {
@@ -143,7 +162,7 @@ func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *storage.En
 	return res
 }
 
-func (e *Evaluator) evalStatements(stmts []ast.Statement, env *storage.Env) objects.Object {
+func (e *Evaluator) evalStatements(stmts []ast.Statement, env *objects.Storage) objects.Object {
 	var res objects.Object
 
 	for _, value := range stmts {
@@ -156,6 +175,21 @@ func (e *Evaluator) evalStatements(stmts []ast.Statement, env *storage.Env) obje
 		case *objects.ErrorObject:
 			return res
 		}
+	}
+
+	return res
+}
+
+func (e *Evaluator) evalExpressions(exps []ast.Expression, env *objects.Storage) []objects.Object {
+	var res []objects.Object
+
+	for _, value := range exps {
+		r := e.eval(value, env)
+		if isError(r) {
+			return []objects.Object{r}
+		}
+
+		res = append(res, r)
 	}
 
 	return res

@@ -179,6 +179,29 @@ func TestEvalIdentifier(t *testing.T) {
 	}
 }
 
+func TestFunctionCalls(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected int64
+	}{
+		{
+			tcase: `func funcion_nueva(a) {
+        retorna 2;
+    }
+            funcion_nueva(2);
+    `,
+			expected: 2},
+	}
+
+	for _, tt := range testCases {
+		p := parseAndEval(t, tt.tcase)
+		if p == nil {
+			continue
+		}
+		testInteger(t, p, tt.expected)
+	}
+}
+
 // --- Testing utils ---
 
 func testBool(t *testing.T, evaluated objects.Object, expected bool) {
@@ -201,11 +224,13 @@ func testBool(t *testing.T, evaluated objects.Object, expected bool) {
 func testInteger(t *testing.T, evaluated objects.Object, expected int64) {
 	if evaluated.Type() != objects.INTEGER_OBJ {
 		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Inspect())
+		return
 	}
 
 	res, ok := evaluated.(*objects.Integer)
 	if !ok {
 		t.Errorf("Cannot parse to 'Object integer'")
+		return
 	}
 
 	if res.Value != expected {
@@ -244,7 +269,7 @@ func parseAndEval(t *testing.T, input string) objects.Object {
 	}
 
 	ev := NewFromProgram(p)
-	evaluated := ev.EvalProgram()
+	evaluated := ev.EvalProgram(objects.NewStorage())
 
 	if evaluated == nil {
 		t.Errorf("Evaluator returned a nil value")

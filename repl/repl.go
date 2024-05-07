@@ -6,8 +6,8 @@ import (
 	"io"
 
 	"github.com/sl2.0/evaluator"
-	"github.com/sl2.0/evaluator/storage"
 	"github.com/sl2.0/lexer"
+	"github.com/sl2.0/objects"
 	"github.com/sl2.0/parser"
 	"github.com/sl2.0/tokens"
 )
@@ -73,7 +73,7 @@ func StartLiveParser(in io.Reader, out io.Writer) {
 // Starts a new REPL
 func StartREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := storage.NewEnv()
+	env := objects.NewStorage()
 
 	for {
 		fmt.Print("\n>>> ")

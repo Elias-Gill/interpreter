@@ -1,6 +1,10 @@
 package objects
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/sl2.0/ast"
+)
 
 type ObjectType string
 
@@ -11,13 +15,15 @@ type Object interface {
 
 const (
 	INTEGER_OBJ = "INTEGER"
+	STRING_OBJ  = "STRING"
 	BOOL_OBJ    = "BOOL"
 	NULL_OBJ    = "NULL"
 	ERROR_OBJ   = "ERROR"
-	RETURN_OBJ  = "NULL"
+	RETURN_OBJ  = "RETURN"
+	FUNC_OBJ    = "FUNCTION"
 )
 
-// --- Object types ---
+// --- Primitive data types ---
 
 type Integer struct {
 	Value int64
@@ -40,6 +46,19 @@ func (b *Boolean) Type() ObjectType {
 func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%v", b.Value)
 }
+
+type String struct {
+	Value string
+}
+
+func (i *String) Type() ObjectType {
+	return INTEGER_OBJ
+}
+func (i *String) Inspect() string {
+	return i.Value
+}
+
+// --- Complex data types ---
 
 type ErrorObject struct {
 	error string
@@ -66,4 +85,23 @@ func (r *ReturnObject) Type() ObjectType {
 }
 func (r *ReturnObject) Inspect() string {
 	return r.Value.Inspect()
+}
+
+type FunctionObject struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        Storage
+}
+
+func (f *FunctionObject) Type() ObjectType {
+	return RETURN_OBJ
+}
+func (f *FunctionObject) Inspect() string {
+	s := "("
+	for _, param := range f.Parameters {
+		s += param.ToString() + " "
+	}
+	s += ")"
+
+	return s + "\n" + f.Body.ToString()
 }
