@@ -82,6 +82,15 @@ func (l *Lexer) NexToken() tokens.Token {
 		token = newSingleToken(tokens.RPAR, l.ch)
 	case '(':
 		token = newSingleToken(tokens.LPAR, l.ch)
+	case '"':
+		str := ""
+		for l.pickChar() != '"' {
+			l.readChar()
+			str += string(l.ch)
+		}
+		// skeep the final '"'
+		l.readChar()
+		token = newMultiToken(tokens.STRING, str)
 	case '\n':
 		l.skipLineBreaks()
 		token = newMultiToken(tokens.LINEBREAK, "")

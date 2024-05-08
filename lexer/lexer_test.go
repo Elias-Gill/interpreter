@@ -137,6 +137,14 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.EOF, Literal: ""},
 			},
 		},
+		{ // strings
+			`"hola que hace"; "chau"`,
+			[]tokens.Token{
+				{Type: tokens.STRING, Literal: "hola que hace"},
+				{Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.STRING, Literal: "chau"},
+			},
+		},
 		{ // invalid tokens
 			`~@#$^&`,
 			[]tokens.Token{
