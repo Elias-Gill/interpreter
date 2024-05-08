@@ -57,6 +57,22 @@ func TestNextToken(t *testing.T) {
 			},
 		},
 		{
+			`
+            // comentario que debe de ser ignorado
+            var numero_nuevo: entero = 22; // comment`,
+			[]tokens.Token{
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.VAR, Literal: "var"},
+				{Type: tokens.IDENT, Literal: "numero_nuevo"},
+				{Type: tokens.COLON, Literal: ":"},
+				{Type: tokens.DATATYPE, Literal: "entero"},
+				{Type: tokens.ASIGN, Literal: "="},
+				{Type: tokens.NUMBER, Literal: "22"},
+				{Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.EOF, Literal: ""},
+			},
+		},
+		{
 			`func nuevo_parcial(nombre: cadena): entero {
                 var auxiliar: entero
                 si algo == true {
@@ -140,10 +156,11 @@ func TestNextToken(t *testing.T) {
 		for i := 0; i < len(test.expected); i++ {
 			token := lexer.NexToken()
 			if token.Type != test.expected[i].Type || token.Literal != test.expected[i].Literal {
-				t.Fatalf("\nExpected token type: %s \n\tGot: %s \n\nExpected token value: %s \n\tGot: %s \nTest case: %d, token %d",
+				t.Errorf("\nExpected token type: %s \n\tGot: %s \n\nExpected token value: %s \n\tGot: %s \nTest case: %d, token %d \n'%s'",
 					test.expected[i].Type, token.Type,
 					test.expected[i].Literal, token.Literal,
 					id+1, i,
+					test.input,
 				)
 			}
 		}

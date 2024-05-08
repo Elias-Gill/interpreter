@@ -25,6 +25,16 @@ func (l *Lexer) NexToken() tokens.Token {
 
 	l.burnWhiteSpaces()
 
+	// first search for comments and ignore them, consuming every
+	// character till the end of the line (or end of the file)
+	if l.ch == '/' && l.pickChar() == '/' {
+		for l.ch != '\n' && l.ch != 0 {
+			l.readChar()
+		}
+        l.skipLineBreaks()
+		l.burnWhiteSpaces()
+	}
+
 	// start generating tokens
 	switch l.ch {
 	// operators
