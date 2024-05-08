@@ -47,17 +47,17 @@ var precedences = map[string]int{
 
 // Generates a new parser using the given input string
 func NewParser(input string) *Parser {
-    parser := &Parser{
-        lexer:  lexer.NewLexer(input),
-        errors: []string{},
+	parser := &Parser{
+		lexer:  lexer.NewLexer(input),
+		errors: []string{},
 
-        infixParseFns:  make(map[tokens.TokenType]infixFn),
-        prefixParseFns: make(map[tokens.TokenType]prefixFn),
-    }
+		infixParseFns:  make(map[tokens.TokenType]infixFn),
+		prefixParseFns: make(map[tokens.TokenType]prefixFn),
+	}
 
-    parser.InitParsingFns()
+	parser.InitParsingFns()
 
-    return parser
+	return parser
 }
 
 // Returns a new parser using the tokens from a custom lexer
@@ -70,7 +70,7 @@ func NewParserFromLexer(lexer *lexer.Lexer) *Parser {
 		prefixParseFns: make(map[tokens.TokenType]prefixFn),
 	}
 
-    parser.InitParsingFns()
+	parser.InitParsingFns()
 
 	return parser
 }

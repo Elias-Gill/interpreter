@@ -111,11 +111,11 @@ func TestNextToken(t *testing.T) {
 
 				{Type: tokens.LINEBREAK, Literal: ""},
 
-                {Type: tokens.FOR, Literal: "repetir"},
-                {Type: tokens.NUMBER, Literal: "33"},
-                {Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.FOR, Literal: "repetir"},
+				{Type: tokens.NUMBER, Literal: "33"},
+				{Type: tokens.SEMICOLON, Literal: ";"},
 
-                {Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.LINEBREAK, Literal: ""},
 
 				{Type: tokens.RBRAC, Literal: "}"},
 				{Type: tokens.EOF, Literal: ""},

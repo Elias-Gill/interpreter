@@ -16,7 +16,7 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) HasErrors() bool {
-    return len(p.errors) != 0
+	return len(p.errors) != 0
 }
 
 func (p *Parser) registerInfixFn(t tokens.TokenType, f infixFn) {

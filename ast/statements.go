@@ -11,8 +11,8 @@ import (
 
 type VarStatement struct {
 	Identifier *Identifier
-	Value Expression
-	Token tokens.Token
+	Value      Expression
+	Token      tokens.Token
 }
 
 func (v *VarStatement) statementNode() {}

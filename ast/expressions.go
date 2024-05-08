@@ -210,7 +210,7 @@ type FunctionLiteral struct {
 
 func NewFunctionLiteral(t tokens.Token) *FunctionLiteral {
 	return &FunctionLiteral{
-		Token:      t,
+		Token: t,
 	}
 }
 

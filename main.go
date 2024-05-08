@@ -34,5 +34,5 @@ func main() {
 		return
 	}
 
-    repl.StartREPL(os.Stdin, os.Stdout)
+	repl.StartREPL(os.Stdin, os.Stdout)
 }
