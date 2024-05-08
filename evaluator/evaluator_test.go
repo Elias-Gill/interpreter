@@ -191,12 +191,12 @@ func TestFunctionCalls(t *testing.T) {
             algo();`,
 			expected: 2},
 
-        {
-            tcase: `func algo(a, b) {
+		{
+			tcase: `func algo(a, b) {
             retorna a * b;
             }
             algo(2, 8);`,
-            expected: 16},
+			expected: 16},
 	}
 
 	for _, tt := range testCases {

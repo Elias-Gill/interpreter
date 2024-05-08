@@ -31,7 +31,7 @@ func (l *Lexer) NexToken() tokens.Token {
 		for l.ch != '\n' && l.ch != 0 {
 			l.readChar()
 		}
-        l.skipLineBreaks()
+		l.skipLineBreaks()
 		l.burnWhiteSpaces()
 	}
 
