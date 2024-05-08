@@ -24,6 +24,8 @@ func (e *Evaluator) evalInfix(exp *ast.InfixExpression, env *objects.Storage) ob
 		return e.evalArithmeticOperations(exp, env)
 	case objects.BOOL_OBJ:
 		return e.evalBooleanExpression(exp, env)
+	case objects.STRING_OBJ:
+		return e.evalStringExpression(exp, env)
 	}
 
 	return objects.NewError("Not supported infix operation: %s", exp.Operator)
@@ -78,6 +80,33 @@ func (e *Evaluator) evalBooleanExpression(exp *ast.InfixExpression, env *objects
 		return &objects.Boolean{Value: left.Value == right.Value}
 	case "!=":
 		return &objects.Boolean{Value: left.Value != right.Value}
+	}
+
+	return objects.NewError(
+		"Not supported operator: %s",
+		exp.Operator)
+}
+
+func (e *Evaluator) evalStringExpression(exp *ast.InfixExpression, env *objects.Storage) objects.Object {
+	left := e.eval(exp.Left, env).(*objects.String)
+
+	evalRight := e.eval(exp.Right, env)
+
+	if evalRight.Type() != objects.STRING_OBJ {
+		return objects.NewError(
+			"Expected right value to be a String.\n\tGot: %v",
+			evalRight.Inspect())
+	}
+
+	right := evalRight.(*objects.String)
+
+	switch exp.Operator {
+	case "==":
+		return &objects.Boolean{Value: left.Value == right.Value}
+	case "!=":
+		return &objects.Boolean{Value: left.Value != right.Value}
+	case "+":
+		return &objects.String{Value: left.Value + right.Value}
 	}
 
 	return objects.NewError(

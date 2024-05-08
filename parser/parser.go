@@ -84,6 +84,7 @@ func (parser *Parser) InitParsingFns() {
 	parser.registerPrefixFn(tokens.MINUS, parser.parsePrefixExpression)
 	parser.registerPrefixFn(tokens.IDENT, parser.parseIdentifier)
 	parser.registerPrefixFn(tokens.NUMBER, parser.parseNumber)
+	parser.registerPrefixFn(tokens.STRING, parser.parseString)
 	parser.registerPrefixFn(tokens.TRUE, parser.parseBoolExpression)
 	parser.registerPrefixFn(tokens.FALSE, parser.parseBoolExpression)
 	parser.registerPrefixFn(tokens.LPAR, parser.parseGroupedExpression)

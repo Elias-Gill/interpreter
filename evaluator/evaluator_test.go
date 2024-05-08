@@ -1,12 +1,8 @@
 package evaluator
 
 import (
-	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/sl2.0/objects"
-	"github.com/sl2.0/parser"
 )
 
 func TestIntegerEvaluation(t *testing.T) {
@@ -17,6 +13,16 @@ func TestIntegerEvaluation(t *testing.T) {
 	}
 
 	testInteger(t, evaluated, 1123)
+}
+
+func TestStringEvaluation(t *testing.T) {
+	evaluated := parseAndEval(t, `"personal"`)
+
+	if evaluated == nil {
+		return
+	}
+
+	testString(t, evaluated, "personal")
 }
 
 func TestBooleanEvaluation(t *testing.T) {
@@ -71,6 +77,26 @@ func TestInfixArithmetic(t *testing.T) {
 	}
 }
 
+func TestInfixStrings(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected string
+	}{
+		{tcase: `"Hola" + "chau"`, expected: "Holachau"},
+		{tcase: `"Hola " + "personal "`, expected: "Hola personal "},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testString(t, evaluated, tc.expected)
+	}
+}
+
 func TestInfixComparison(t *testing.T) {
 	testCases := []struct {
 		tcase    string
@@ -80,6 +106,8 @@ func TestInfixComparison(t *testing.T) {
 		{tcase: "-12 + 24 > -12", expected: true},
 		{tcase: "(-12 + 24) == 12 ", expected: true},
 		{tcase: "-(11 + 1) != 2 ", expected: true},
+		{tcase: `"Hola" == "chau"`, expected: false},
+		{tcase: `"Hola" == "Hola"`, expected: true},
 	}
 
 	for _, tc := range testCases {
@@ -206,81 +234,4 @@ func TestFunctionCalls(t *testing.T) {
 		}
 		testInteger(t, p, tt.expected)
 	}
-}
-
-// --- Testing utils ---
-
-func testBool(t *testing.T, evaluated objects.Object, expected bool) {
-	if evaluated.Type() != objects.BOOL_OBJ {
-		t.Errorf("Expected 'Object Boolean' type. Got %s", evaluated.Inspect())
-		return
-	}
-
-	value, ok := evaluated.(*objects.Boolean)
-	if !ok {
-		t.Errorf("Cannot parse to 'Object integer'")
-		return
-	}
-
-	if value.Value != expected {
-		t.Errorf("Expected '%v'. Got %v", expected, value.Value)
-	}
-}
-
-func testInteger(t *testing.T, evaluated objects.Object, expected int64) {
-	if evaluated.Type() != objects.INTEGER_OBJ {
-		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Inspect())
-		return
-	}
-
-	res, ok := evaluated.(*objects.Integer)
-	if !ok {
-		t.Errorf("Cannot parse to 'Object integer'")
-		return
-	}
-
-	if res.Value != expected {
-		t.Errorf("Expected '%d'. Got %d", expected, res.Value)
-	}
-}
-
-func parseAndEval(t *testing.T, input string) objects.Object {
-	const colorMagenta = "\033[35m"
-	const colorNone = "\033[0m"
-
-	parser := parser.NewParser(input)
-	p := parser.ParseProgram()
-
-	// check errors
-	if len(parser.Errors()) != 0 {
-		s := ""
-
-		for _, value := range parser.Errors() {
-			s += fmt.Sprintf("\n%s", value)
-		}
-
-		t.Errorf("Found %s%d%s parsing errors: %s",
-			colorMagenta, len(parser.Errors()), colorNone, s)
-		return nil
-	}
-
-	if p == nil {
-		t.Errorf("ParseProgram() returned nil")
-		return nil
-	}
-
-	if len(p.Statements) == 0 {
-		t.Errorf("Empty AST")
-		return nil
-	}
-
-	ev := NewFromProgram(p)
-	evaluated := ev.EvalProgram(objects.NewStorage())
-
-	if evaluated == nil {
-		t.Errorf("Evaluator returned a nil value")
-		return nil
-	}
-
-	return evaluated
 }

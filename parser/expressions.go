@@ -40,6 +40,10 @@ func (p *Parser) parseNumber() ast.Expression {
 	return exp
 }
 
+func (p *Parser) parseString() ast.Expression {
+	return ast.NewString(p.currentToken)
+}
+
 func (p *Parser) parseBoolExpression() ast.Expression {
 	exp := ast.NewBoolean(p.currentToken)
 

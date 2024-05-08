@@ -139,6 +139,9 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 			return true_obj
 		}
 		return false_obj
+
+	case *ast.StringLiteral:
+		return &objects.String{Value: node.Value}
 	}
 
 	return objects.NewError(

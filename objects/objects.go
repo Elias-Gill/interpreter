@@ -52,7 +52,7 @@ type String struct {
 }
 
 func (i *String) Type() ObjectType {
-	return INTEGER_OBJ
+	return STRING_OBJ
 }
 func (i *String) Inspect() string {
 	return i.Value
@@ -105,3 +105,4 @@ func (f *FunctionObject) Inspect() string {
 
 	return s + "\n" + f.Body.ToString()
 }
+
