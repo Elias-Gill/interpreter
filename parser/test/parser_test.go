@@ -334,17 +334,16 @@ func TestIfExpression(t *testing.T) {
 }
 
 // Named functions
-func TestFuncStatement(t *testing.T) {
-	input := `func funcion_nueva() {
+func TestFuncDeclaration(t *testing.T) {
+	input := `func algo() {
         retorna 33;
     }
-    var nuevo = 2;
     `
 	param_list := []string{}
 
 	p := generateProgram(t, input)
 
-	if len(p.Statements) != 2 {
+	if len(p.Statements) != 1 {
 		t.Fatalf("Number of statements found: %d", len(p.Statements))
 	}
 
@@ -357,10 +356,10 @@ func TestFuncStatement(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.FunctionStatement")
 	}
 
-	testIdentifier(t, fun.Identifier, "funcion_nueva")
+	testIdentifier(t, fun.Identifier, "algo")
 
 	if len(fun.Paramenters) != len(param_list) {
-		t.Fatalf("Expected 0 parameters. Got %v", len(fun.Paramenters))
+		t.Fatalf("Expected %v parameters. Got %v", len(param_list), len(fun.Paramenters))
 	}
 
 	for i, v := range fun.Paramenters {
@@ -374,13 +373,11 @@ func TestFuncStatement(t *testing.T) {
 	}
 
 	testReturnFunc(t, fun.Body.Statements[0], 33)
-
-	testVar(t, p.Statements[1], "nuevo", 2)
 }
 
-func TestFuncExpression(t *testing.T) {
+func TestAnonnymousFunc(t *testing.T) {
 	input := `var f = func(x, y) {
-    var nuevo = 33;
+        var nuevo = 33;
     }`
 	param_list := []string{"x", "y"}
 

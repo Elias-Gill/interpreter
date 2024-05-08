@@ -26,30 +26,30 @@ const (
 	FALSE  = "FALSE"
 
 	// especial characters
-	COLON     = "COLON"
-	SEMICOLON = "SEMICOLON"
+	COLON     = "COLON"     // :
+	SEMICOLON = "SEMICOLON" // ;
 	EOF       = "EOF"
 	LINEBREAK = "LINEBREAK"
 	ILLEGAL   = "ILLEGAL"
 
 	// operators
-	PLUS     = "PLUS"
-	MINUS    = "MINUS"
-	ASTERISC = "ASTERISC"
-	BANG     = "BANG"
-	COMMA    = "COMMA"
-	ASIGN    = "ASIGN"  // =
-	EQUALS   = "EQUALS" // ==
+	PLUS     = "PLUS"     // +
+	MINUS    = "MINUS"    // -
+	ASTERISC = "ASTERISC" // *
+	BANG     = "BANG"     // !
+	COMMA    = "COMMA"    // ,
+	ASIGN    = "ASIGN"    // =
+	EQUALS   = "EQUALS"   // ==
 	NOTEQUAL = "NOTEQUAL"
 	SLASH    = "STROKE"
 
 	// brackets and parenteses
-	LBRAC = "LBRAC"
-	RBRAC = "RBRAC"
-	LPAR  = "LPAR"
-	RPAR  = "RPAR"
-	LT    = "LT"
-	GT    = "GT"
+	LBRAC = "LBRAC" // {
+	RBRAC = "RBRAC" // }
+	LPAR  = "LPAR"  // (
+	RPAR  = "RPAR"  // )
+	LT    = "LT"    // <
+	GT    = "GT"    // >
 )
 
 var keywords = map[string]TokenType{

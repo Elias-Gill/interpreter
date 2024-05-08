@@ -34,6 +34,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 		Token: p.currentToken,
 	}
 
+	// step over "retorna"
 	p.advanceToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
@@ -71,28 +72,30 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
-	tree := &ast.BlockStatement{}
-	tree.Statements = []ast.Statement{}
+	block := &ast.BlockStatement{}
+	block.Statements = []ast.Statement{}
 
 	if !p.advanceIfCurToken(tokens.LBRAC) {
 		return nil
 	}
 
-	for !p.curTokenIs(tokens.EOF) && !p.curTokenIs(tokens.RBRAC) {
+	for !p.curTokenIs(tokens.RBRAC) {
 		stmt := p.parseStatement()
 
 		if stmt != nil {
-			tree.Statements = append(tree.Statements, stmt)
+			block.Statements = append(block.Statements, stmt)
 		}
 
-		p.advanceToken()
+		if !p.curTokenIs(tokens.RBRAC) {
+			p.advanceToken()
+		}
 	}
 
 	if !p.advanceIfCurToken(tokens.RBRAC) {
 		return nil
 	}
 
-	return tree
+	return block
 }
 
 func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
@@ -104,16 +107,7 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 
 	f.Identifier = ast.NewIdentifier(p.currentToken)
 
-	if !p.advanceIfNextToken(tokens.LPAR) {
-		return nil
-	}
-
-	params := p.parseFuncParameters()
-	if params == nil {
-		return nil
-	}
-
-	f.Paramenters = params
+	f.Paramenters = p.parseFuncParameters()
 
 	body := p.parseBlockStatement()
 	if body == nil {
@@ -129,9 +123,10 @@ func (p *Parser) parseFuncParameters() []*ast.Identifier {
 	var params []*ast.Identifier
 
 	// jump the "("
-	if !p.advanceIfCurToken(tokens.LPAR) {
+	if !p.advanceIfNextToken(tokens.LPAR) {
 		return nil
 	}
+	p.advanceToken()
 
 	for !p.curTokenIs(tokens.RPAR) {
 		ident := ast.NewIdentifier(p.currentToken)

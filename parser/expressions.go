@@ -95,47 +95,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseFunctionLiteral() ast.Expression {
-	f := ast.NewFunctionLiteral(p.currentToken)
-
-	if !p.advanceIfNextToken(tokens.IDENT) {
-		return nil
-	}
-
-	f.Identifier = ast.NewIdentifier(p.currentToken)
-
-	if !p.advanceIfNextToken(tokens.LPAR) {
-		return nil
-	}
-
-	params := p.parseFuncParameters()
-	if params == nil {
-		return nil
-	}
-
-	f.Paramenters = params
-
-	body := p.parseBlockStatement()
-	if body == nil {
-		return nil
-	}
-
-	f.Body = body
-
-	return f
-}
-
-func (p *Parser) parseAnonymousFunction() ast.Expression {
-	// annonymous functions dont have an identifier
-	if p.nextTokenIs(tokens.IDENT) {
-		return p.parseFunctionLiteral()
-	}
-
+func (p *Parser) parseAnonnymousFunction() ast.Expression {
 	f := ast.NewAnonymousFunction(p.currentToken)
-
-	if !p.advanceIfNextToken(tokens.LPAR) {
-		return nil
-	}
 
 	params := p.parseFuncParameters()
 	if params == nil {

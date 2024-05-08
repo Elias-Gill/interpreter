@@ -201,39 +201,6 @@ func (f *AnonymousFunction) ToString() string {
 	return buffer.String()
 }
 
-type FunctionLiteral struct {
-	Paramenters []*Identifier
-	Body        *BlockStatement
-	Identifier  *Identifier
-	Token       tokens.Token
-}
-
-func NewFunctionLiteral(t tokens.Token) *FunctionLiteral {
-	return &FunctionLiteral{
-		Token: t,
-	}
-}
-
-func (f *FunctionLiteral) expressionNode() {}
-func (f *FunctionLiteral) TokenLiteral() string {
-	return f.Token.Literal
-}
-func (f *FunctionLiteral) ToString() string {
-	var buffer bytes.Buffer
-
-	buffer.WriteString(f.TokenLiteral())
-	buffer.WriteString("(")
-
-	for _, v := range f.Paramenters {
-		buffer.WriteString(v.ToString() + ", ")
-	}
-
-	buffer.WriteString(")")
-	buffer.WriteString(f.Body.ToString())
-
-	return buffer.String()
-}
-
 type FunctionCall struct {
 	Arguments  []Expression
 	Identifier Expression

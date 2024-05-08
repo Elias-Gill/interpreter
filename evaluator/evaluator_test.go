@@ -185,12 +185,18 @@ func TestFunctionCalls(t *testing.T) {
 		expected int64
 	}{
 		{
-			tcase: `func funcion_nueva(a) {
-        retorna 2;
-    }
-            funcion_nueva(2);
-    `,
+			tcase: `func algo() {
+                retorna 2;
+            }
+            algo();`,
 			expected: 2},
+
+        {
+            tcase: `func algo(a, b) {
+            retorna a * b;
+            }
+            algo(2, 8);`,
+            expected: 16},
 	}
 
 	for _, tt := range testCases {
