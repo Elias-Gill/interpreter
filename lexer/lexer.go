@@ -3,7 +3,8 @@ package lexer
 import "github.com/sl2.0/tokens"
 
 type Lexer struct {
-	input           string
+	input string
+	// both variables are initialized on 0 by default (go's default behavior).
 	currentPosition int // position of the current character
 	nextPosition    int // position of the next character
 	ch              byte
@@ -93,7 +94,8 @@ func (l *Lexer) NexToken() tokens.Token {
 		token = newMultiToken(tokens.STRING, str)
 	case '\n':
 		l.skipLineBreaks()
-		token = newMultiToken(tokens.LINEBREAK, "")
+		// early return to avoid errors with some multiline characters
+		return newMultiToken(tokens.LINEBREAK, "")
 	case 0:
 		token = newMultiToken(tokens.EOF, "")
 

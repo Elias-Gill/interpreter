@@ -105,4 +105,3 @@ func (f *FunctionObject) Inspect() string {
 
 	return s + "\n" + f.Body.ToString()
 }
-

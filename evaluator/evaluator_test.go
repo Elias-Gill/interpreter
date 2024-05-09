@@ -129,6 +129,14 @@ func TestIfEvaluation(t *testing.T) {
 		{tcase: "si(-12 + 24 < -12){true}sino{false}", expected: false},
 		{tcase: "si(true){true}sino{false}", expected: true},
 		{tcase: "si(false){true}sino{false}", expected: false},
+		{tcase: `
+            var nuevo = 1;
+            si (nuevo == 2) {
+                true
+            } sino {
+                false
+            }
+            `, expected: false},
 	}
 
 	for _, tc := range testCases {

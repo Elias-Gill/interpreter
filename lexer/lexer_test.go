@@ -77,7 +77,9 @@ func TestNextToken(t *testing.T) {
                 var auxiliar: entero
                 si algo == true {
                     retorna false
-                } sino {}
+                } sino {
+                    retorna true
+                }
 
                 retorna nombre
                 repetir 33;
@@ -118,6 +120,10 @@ func TestNextToken(t *testing.T) {
 
 				{Type: tokens.ELSE, Literal: "sino"},
 				{Type: tokens.LBRAC, Literal: "{"},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.RETURN, Literal: "retorna"},
+				{Type: tokens.TRUE, Literal: "true"},
+				{Type: tokens.LINEBREAK, Literal: ""},
 				{Type: tokens.RBRAC, Literal: "}"},
 
 				{Type: tokens.LINEBREAK, Literal: ""},
@@ -154,6 +160,33 @@ func TestNextToken(t *testing.T) {
 				{Type: tokens.ILLEGAL, Literal: "$"},
 				{Type: tokens.ILLEGAL, Literal: "^"},
 				{Type: tokens.ILLEGAL, Literal: "&"},
+			},
+		},
+
+		{
+			`func algo(){
+                retorna 33;
+            }
+
+            algo();`,
+			[]tokens.Token{
+				{Type: tokens.FUNCTION, Literal: "func"},
+				{Type: tokens.IDENT, Literal: "algo"},
+				{Type: tokens.LPAR, Literal: "("},
+				{Type: tokens.RPAR, Literal: ")"},
+				{Type: tokens.LBRAC, Literal: "{"},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.RETURN, Literal: "retorna"},
+				{Type: tokens.NUMBER, Literal: "33"},
+				{Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.RBRAC, Literal: "}"},
+				{Type: tokens.LINEBREAK, Literal: ""},
+				{Type: tokens.IDENT, Literal: "algo"},
+				{Type: tokens.LPAR, Literal: "("},
+				{Type: tokens.RPAR, Literal: ")"},
+				{Type: tokens.SEMICOLON, Literal: ";"},
+				{Type: tokens.EOF, Literal: ""},
 			},
 		},
 	}

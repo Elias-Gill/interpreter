@@ -288,8 +288,7 @@ func TestOperatorPrecedence(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `
-    si (numero > 33) {
+	input := `si (numero > 33) {
         var nuevo = 33;
     } sino { 
         var nuevo = true; 
