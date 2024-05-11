@@ -225,14 +225,29 @@ func TestFunctionCalls(t *testing.T) {
                 retorna 2;
             }
             algo();`,
-			expected: 2},
+			expected: 2,
+		},
+		{
+			tcase: `func higher(a, b) {
+                var aux = a();
+                si (aux > b) {
+                    retorna a;
+                }
+                retorna b;
+            }
 
+            higher(func() {
+                retorna 2;
+            };, 8);`,
+			expected: 8,
+		},
 		{
 			tcase: `func algo(a, b) {
             retorna a * b;
             }
             algo(2, 8);`,
-			expected: 16},
+			expected: 16,
+		},
 	}
 
 	for _, tt := range testCases {
