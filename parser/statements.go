@@ -122,7 +122,7 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 func (p *Parser) parseFuncParameters() []*ast.Identifier {
 	var params []*ast.Identifier
 
-	// jump the "("
+	// jump over the "("
 	if !p.advanceIfNextToken(tokens.LPAR) {
 		return nil
 	}

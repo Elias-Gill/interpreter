@@ -176,7 +176,7 @@ func (e *Evaluator) evalIfExpression(exp *ast.IfExpression, env *objects.Storage
 func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage) objects.Object {
 	f, ok := e.eval(fun.Identifier, env).(*objects.FunctionObject)
 	if !ok {
-		return objects.NewError("Function" + fun.Identifier.ToString() + " not found")
+		return objects.NewError("Function '" + fun.Identifier.ToString() + "' not found")
 	}
 
 	// check argument list size
@@ -190,13 +190,20 @@ func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage
 		return args[0]
 	}
 
-	// create a local environment
+	// create a local scope
 	localEnv := objects.NewEnclosedStorage(env)
 	for i, param := range f.Parameters {
 		localEnv.Set(param.Value, args[i])
 	}
 
-	return e.eval(f.Body, localEnv)
+	// unwrap the returned value
+	result := e.eval(f.Body, localEnv)
+	unwrapped, ok := result.(*objects.ReturnObject)
+	if ok {
+		return unwrapped.Value
+	} else {
+		return result
+	}
 }
 
 func selectBoolObject(exp bool) *objects.Boolean {

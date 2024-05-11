@@ -103,9 +103,6 @@ func (p *Parser) parseAnonnymousFunction() ast.Expression {
 	f := ast.NewAnonymousFunction(p.currentToken)
 
 	params := p.parseFuncParameters()
-	if params == nil {
-		return nil
-	}
 
 	f.Paramenters = params
 
