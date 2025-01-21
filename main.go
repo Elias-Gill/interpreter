@@ -43,6 +43,7 @@ func main() {
 		return
 	}
 
+	fmt.Printf("in%s eval%s mode:\n", colorMagenta, colorNone)
 	repl.StartREPL(os.Stdin, os.Stdout)
 }
 

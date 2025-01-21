@@ -1,9 +1,11 @@
 package repl
 
 import (
-	"bufio"
 	"fmt"
 	"io"
+	"strings"
+
+	"github.com/chzyer/readline"
 
 	"github.com/sl2.0/evaluator"
 	"github.com/sl2.0/lexer"
@@ -12,105 +14,178 @@ import (
 	"github.com/sl2.0/tokens"
 )
 
-// Starts a new live lexer session
+// Starts a new live lexer session with multi-line input support
 func StartLiveLexer(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          ">>> ",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer rl.Close()
 
-	// read with an infinit loop
+	buffer := ""
 	for {
-		fmt.Print("\n>>> ")
-
-		hasNext := scanner.Scan()
-		if !hasNext {
-			return
+		line, err := rl.Readline()
+		if err == readline.ErrInterrupt { // Handle Ctrl+C
+			if buffer != "" {
+				buffer = "" // Clear buffer
+				fmt.Fprintln(out, "Input cleared.")
+				continue
+			}
+			break
+		} else if err != nil { // Handle EOF or errors
+			break
 		}
 
-		line := scanner.Text()
-		if line == "exit" {
-			return
+		// Detect multi-line input with Shift+Enter or empty buffer with Enter
+		if strings.HasSuffix(line, "\\") {
+			buffer += strings.TrimSuffix(line, "\\") + "\n"
+			rl.SetPrompt("... ") // Change prompt for multi-line input
+			continue
 		}
 
-		l := lexer.NewLexer(line)
+		buffer += line
+		if buffer == "exit" { // Exit condition
+			break
+		}
 
+		// Tokenize and output results
+		l := lexer.NewLexer(buffer)
 		for token := l.NexToken(); token.Type != tokens.EOF; token = l.NexToken() {
-			fmt.Printf("\n[Type: %v, Literal: '%v']", token.Type, token.Literal)
+			fmt.Fprintf(out, "\n[Type: %v, Literal: '%v']", token.Type, token.Literal)
 		}
+		fmt.Fprintln(out)
 
-		fmt.Print("\n\n")
+		// Reset for next command
+		buffer = ""
+		rl.SetPrompt(">>> ")
 	}
 }
 
-// Starts a new live parsing session
+// Starts a new live parser session with multi-line input support
 func StartLiveParser(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          ">>> ",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer rl.Close()
 
+	buffer := ""
 	for {
-		fmt.Print("\n>>> ")
-
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		line, err := rl.Readline()
+		if err == readline.ErrInterrupt { // Handle Ctrl+C
+			if buffer != "" {
+				buffer = "" // Clear buffer
+				fmt.Fprintln(out, "Input cleared.")
+				continue
+			}
+			break
+		} else if err != nil { // Handle EOF or errors
+			break
 		}
 
-		line := scanner.Text()
-		if line == "exit" {
-			return
+		// Detect multi-line input with Shift+Enter or empty buffer with Enter
+		if strings.HasSuffix(line, "\\") {
+			buffer += strings.TrimSuffix(line, "\\") + "\n"
+			rl.SetPrompt("... ") // Change prompt for multi-line input
+			continue
 		}
 
-		p := parser.NewParser(line)
+		buffer += line
+		if buffer == "exit" { // Exit condition
+			break
+		}
+
+		// Parse and output results
+		p := parser.NewParser(buffer)
 		program := p.ParseProgram()
 
 		if len(p.Errors()) != 0 {
-			printErrors(out, p.Errors())
+			printErrors(out, p.Errors()) // Print errors if any
+			buffer = ""                  // Clear buffer after errors
+			rl.SetPrompt(">>> ")         // Reset prompt
 			continue
 		}
 
 		io.WriteString(out, program.ToString())
 		io.WriteString(out, "\n")
+
+		// Reset for next command
+		buffer = ""
+		rl.SetPrompt(">>> ")
 	}
 }
 
-// Starts a new REPL
 func StartREPL(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          ">>> ",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer rl.Close()
+
 	env := objects.NewStorage()
+	buffer := ""
 
 	for {
-		fmt.Print("\n>>> ")
-
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		line, err := rl.Readline()
+		if err == readline.ErrInterrupt { // Handle Ctrl+C
+			if buffer != "" {
+				buffer = "" // Clear the buffer
+				fmt.Fprintln(rl.Stderr(), "\nInput cleared.")
+				continue
+			}
+			break
+		} else if err == io.EOF { // Handle EOF (Ctrl+D)
+			break
 		}
 
-		line := scanner.Text()
-		if line == "exit" {
-			return
+		// Detect multi-line input
+		if strings.HasSuffix(line, "\\") { // Use `\\` to continue to the next line
+			buffer += strings.TrimSuffix(line, "\\") + "\n"
+			rl.SetPrompt("... ") // Change prompt for multi-line input
+			continue
 		}
 
-		p := parser.NewParser(line)
+		buffer += line
+		if buffer == "exit" {
+			break
+		}
+
+		// Parse and evaluate the complete input
+		p := parser.NewParser(buffer)
 		program := p.ParseProgram()
 
-		if p.HasErrors() {
+		if len(p.Errors()) != 0 {
 			printErrors(out, p.Errors())
+			buffer = ""          // Clear the buffer after errors
+			rl.SetPrompt(">>> ") // Reset prompt
 			continue
 		}
 
 		ev := evaluator.NewFromProgram(program)
-
 		evaluated := ev.EvalProgram(env)
 
 		if ev.HasErrors() {
 			printErrors(out, ev.Errors())
-			continue
+		} else if evaluated != nil {
+			fmt.Fprintln(out, evaluated.Inspect())
+		} else {
+			fmt.Fprintln(out, "Feature not implemented")
 		}
 
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
-		} else {
-			io.WriteString(out, "Feature not implemented\n")
-		}
+		buffer = ""          // Clear the buffer after evaluation
+		rl.SetPrompt(">>> ") // Reset prompt
 	}
 }
 
