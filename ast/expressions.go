@@ -92,8 +92,8 @@ func (p *PrefixExpression) ToString(lvl int) string {
 
 	indent := strings.Repeat("  ", lvl)
 	out.WriteString(indent + "prefix expression:\n")
-	out.WriteString(indent + "  operator: " + p.Operator + "\n")
-	out.WriteString(indent + "  right:\n")
+	out.WriteString(indent + " operator: " + p.Operator + "\n")
+	out.WriteString(indent + " right:\n")
 	out.WriteString(p.Right.ToString(lvl + 2)) // Increase indentation for the right expression
 
 	return out.String()
@@ -115,10 +115,10 @@ func (i *InfixExpression) ToString(lvl int) string {
 
 	indent := strings.Repeat("  ", lvl)
 	out.WriteString(indent + "infix expression:\n")
-	out.WriteString(indent + "  left:\n")
+	out.WriteString(indent + " left:\n")
 	out.WriteString(i.Left.ToString(lvl+2) + "\n") // Increase indentation for the left expression
 	out.WriteString(indent + " operator: " + i.Operator + "\n")
-	out.WriteString(indent + "  right:\n")
+	out.WriteString(indent + " right:\n")
 	out.WriteString(i.Right.ToString(lvl + 2)) // Increase indentation for the right expression
 
 	return out.String()

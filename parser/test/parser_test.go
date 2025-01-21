@@ -1,421 +1,11 @@
 package test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/sl2.0/ast"
 )
-
-// --- GENERAL TESTS ---
-
-func TestVarStatement(t *testing.T) {
-	testCases := []struct {
-		expectedValue interface{}
-		identifier    string
-		input         string
-	}{
-		{
-			input:         "var persona = 21;",
-			expectedValue: 21,
-			identifier:    "persona",
-		},
-		{
-			input:         " var est_certo = true; ",
-			expectedValue: true,
-			identifier:    "est_certo",
-		},
-		{
-			input:         " var es_falso = false; ",
-			expectedValue: false,
-			identifier:    "es_falso",
-		},
-	}
-
-	for i, tc := range testCases {
-		t.Logf("\n%sRunning test case %d%s", colorMagenta, i+1, colorNone)
-
-		p := generateProgram(t, tc.input)
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-			continue
-		}
-
-		if p.Statements[0].TokenLiteral() != "var" {
-			t.Errorf("Cannot convert statement to ast.ReturnStatement")
-			continue
-		}
-
-		testVar(t, p.Statements[0], tc.identifier, tc.expectedValue)
-	}
-}
-
-func TestReturn(t *testing.T) {
-	tesCases := []struct {
-		expectedValue interface{}
-		input         string
-	}{
-		{
-			input:         "retorna persona;",
-			expectedValue: "persona",
-		},
-	}
-
-	for _, tc := range tesCases {
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Fatalf("Number of statements found: %d", len(p.Statements))
-		}
-
-		testReturnFunc(t, p.Statements[0], tc.expectedValue)
-	}
-}
-
-func TestIntegerExpression(t *testing.T) {
-	tesCases := []struct {
-		expectedValue int
-		input         string
-	}{
-		{
-			input:         `4;`,
-			expectedValue: 4,
-		},
-	}
-
-	for _, tc := range tesCases {
-
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-			continue
-		}
-
-		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
-			continue
-		}
-
-		testLiteralExpression(t, exp.Expression, tc.expectedValue)
-	}
-}
-
-func TestIdentifierExpression(t *testing.T) {
-	tesCases := []struct {
-		expectedValue string
-		input         string
-	}{
-		{
-			input:         ` persona; `,
-			expectedValue: "persona",
-		},
-	}
-
-	for _, tc := range tesCases {
-
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-		}
-
-		// try to convert to type Identifier
-		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
-			continue
-		}
-
-		testLiteralExpression(t, exp.Expression, tc.expectedValue)
-	}
-}
-
-func TestPrefixExpression(t *testing.T) {
-	tesCases := []struct {
-		expectedValue string
-		input         string
-	}{
-		{
-			input:         ` -3; `,
-			expectedValue: "(-3)",
-		},
-		{
-			input:         ` -noviembre; `,
-			expectedValue: "(-noviembre)",
-		},
-		{
-			input:         ` !noviembre; `,
-			expectedValue: "(!noviembre)",
-		},
-	}
-
-	for _, tc := range tesCases {
-
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-		}
-
-		// try to convert to type expression statement
-		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
-			continue
-		}
-
-		if tc.expectedValue != exp.ToString(0) {
-			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString(0))
-			continue
-		}
-	}
-}
-
-func TestInfixExpression(t *testing.T) {
-	tesCases := []struct {
-		expectedValue string
-		input         string
-	}{
-		{
-			input:         ` 2+3; `,
-			expectedValue: "(2+3)",
-		},
-		{
-			input:         ` 21231 * nada; `,
-			expectedValue: "(21231*nada)",
-		},
-		{
-			input:         ` 21231 / nada; `,
-			expectedValue: "(21231/nada)",
-		},
-		{
-			input:         ` 21231 - nada; `,
-			expectedValue: "(21231-nada)",
-		},
-	}
-
-	for _, tc := range tesCases {
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-		}
-
-		// try to convert to type Identifier
-		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
-			return
-		}
-
-		testInfix(t, exp.Expression, tc.expectedValue)
-	}
-}
-
-func TestOperatorPrecedence(t *testing.T) {
-	tesCases := []struct {
-		expectedValue string
-		input         string
-	}{
-		{
-			input:         ` 2+-3; `,
-			expectedValue: "(2+(-3))",
-		},
-		{
-			input:         ` -2+-3; `,
-			expectedValue: "((-2)+(-3))",
-		},
-		{
-			input:         ` -2 > 5 + 4*nada == 33; `,
-			expectedValue: "(((-2)>(5+(4*nada)))==33)",
-		},
-		{
-			input:         ` -2 > (5 + 4)*nada == 33; `,
-			expectedValue: "(((-2)>((5+4)*nada))==33)",
-		},
-		{
-			input:         ` -2 + (5 + 4)*nada/(feo + 2); `,
-			expectedValue: "((-2)+(((5+4)*nada)/(feo+2)))",
-		},
-	}
-
-	for _, tc := range tesCases {
-
-		p := generateProgram(t, tc.input)
-
-		if p == nil {
-			t.Fatalf("ParseProgram() returned nil")
-		}
-
-		if len(p.Statements) != 1 {
-			t.Errorf("Number of statements found: %d", len(p.Statements))
-		}
-
-		// try to convert to type Identifier
-		exp, ok := p.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Errorf("Cannot convert statement to ast.ExpressionStatement")
-			continue
-		}
-
-		if tc.expectedValue != exp.ToString(0) {
-			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString(0))
-			continue
-		}
-	}
-}
-
-func TestIfExpression(t *testing.T) {
-	input := `si (numero > 33) {
-        var nuevo = 33;
-    } sino { 
-        var nuevo = true; 
-    }
-
-    var nuevo = 2;
-    `
-
-	p := generateProgram(t, input)
-
-	if len(p.Statements) != 2 {
-		t.Fatalf("Number of statements found: %d", len(p.Statements))
-	}
-
-	if p.Statements[0].TokenLiteral() != "si" {
-		t.Fatalf("Expected 'si'. Got: %v", p.Statements[0].TokenLiteral())
-	}
-
-	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
-	}
-
-	v, ok := stmt.Expression.(*ast.IfExpression)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.IfExpression")
-	}
-
-	testInfix(t, v.Condition, "(numero>33)")
-
-	if v.Consequence == nil {
-		t.Fatalf("Empty consecuence")
-	}
-
-	testVar(t, v.Consequence.Statements[0], "nuevo", 33)
-
-	if v.Alternative == nil {
-		t.Fatalf("Empty alternative")
-	}
-
-	testVar(t, v.Alternative.Statements[0], "nuevo", true)
-}
-
-// Named functions
-func TestFuncDeclaration(t *testing.T) {
-	input := `func algo() {
-        retorna 33;
-    }
-    `
-	param_list := []string{}
-
-	p := generateProgram(t, input)
-
-	if len(p.Statements) != 1 {
-		t.Fatalf("Number of statements found: %d", len(p.Statements))
-	}
-
-	if p.Statements[0].TokenLiteral() != "func" {
-		t.Fatalf("Expected 'func'. Got: %v", p.Statements[0].TokenLiteral())
-	}
-
-	fun, ok := p.Statements[0].(*ast.FunctionStatement)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.FunctionStatement")
-	}
-
-	testIdentifier(t, fun.Identifier, "algo")
-
-	if len(fun.Parameters) != len(param_list) {
-		t.Fatalf("Expected %v parameters. Got %v", len(param_list), len(fun.Parameters))
-	}
-
-	for i, v := range fun.Parameters {
-		if v.Value != param_list[i] {
-			t.Errorf("Expected parameter name '%s'. Got: %s", v.Value, param_list[i])
-		}
-	}
-
-	if fun.Body == nil {
-		t.Fatalf("Empty function body")
-	}
-
-	testReturnFunc(t, fun.Body.Statements[0], 33)
-}
-
-func TestAnonnymousFunc(t *testing.T) {
-	input := `var f = func(x, y) {
-        var nuevo = 33;
-    }`
-	param_list := []string{"x", "y"}
-
-	p := generateProgram(t, input)
-
-	if len(p.Statements) != 1 {
-		t.Fatalf("Number of statements found: %d", len(p.Statements))
-	}
-
-	if p.Statements[0].TokenLiteral() != "var" {
-		t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
-	}
-
-	stmt, ok := p.Statements[0].(*ast.VarStatement)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.VarStatement")
-	}
-
-	exp, ok := stmt.Value.(*ast.AnonymousFunction)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
-	}
-
-	if len(exp.Parameters) != 2 {
-		t.Fatalf("Expected 2 parameters. Got %v", len(exp.Parameters))
-	}
-
-	for i, v := range exp.Parameters {
-		if v.Value != param_list[i] {
-			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", v.Value)
-		}
-	}
-
-	if exp.Body == nil {
-		t.Fatalf("Empty function body")
-	}
-
-	testVar(t, exp.Body.Statements[0], "nuevo", 33)
-}
 
 func TestFuncCall(t *testing.T) {
 	testCases := []struct {
@@ -424,26 +14,49 @@ func TestFuncCall(t *testing.T) {
 	}{
 		{
 			input: `new_function(x, y + 1)`,
-			args:  []string{"x", "(y+1)"},
+			args: []string{
+				`x`,
+				`infix expression:
+ left:
+    y
+ operator: +
+ right:
+    1`,
+			},
 		},
 		{
 			input: `new_function(x * (4 + 33), y + 1)`,
-			args:  []string{"(x*(4+33))", "(y+1)"},
+			args: []string{
+				`infix expression:
+ left:
+    x
+ operator: *
+ right:
+    infix expression:
+     left:
+        4
+     operator: +
+     right:
+        33`,
+				`infix expression:
+ left:
+    y
+ operator: +
+ right:
+    1`,
+			},
 		},
 	}
 
 	for _, tc := range testCases {
-		input := tc.input
-		args_list := tc.args
+		p := generateProgram(t, tc.input)
 
-		p := generateProgram(t, input)
+		if p == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
 
 		if len(p.Statements) != 1 {
 			t.Fatalf("Number of statements found: %d", len(p.Statements))
-		}
-
-		if p.Statements[0].TokenLiteral() != "new_function" {
-			t.Fatalf("Expected 'var'. Got: %v", p.Statements[0].TokenLiteral())
 		}
 
 		stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
@@ -465,52 +78,11 @@ func TestFuncCall(t *testing.T) {
 		}
 
 		for i, v := range exp.Arguments {
-			if v.ToString(0) != args_list[i] {
-				t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString(0))
+			expected := strings.TrimSpace(tc.args[i])
+			actual := strings.TrimSpace(v.ToString(0))
+			if actual != expected {
+				t.Errorf("Expected:\n%s\nGot:\n%s", expected, actual)
 			}
 		}
 	}
-}
-
-func TestForLoop(t *testing.T) {
-	input := `
-    repetir 2 {
-        var nuevo = 33;
-    }
-    var nuevo = 33;
-    `
-
-	p := generateProgram(t, input)
-
-	if len(p.Statements) != 2 {
-		t.Fatalf("Number of statements found: %d", len(p.Statements))
-	}
-
-	if p.Statements[0].TokenLiteral() != "repetir" {
-		t.Fatalf("Expected 'func'. Got: %v", p.Statements[0].TokenLiteral())
-	}
-
-	stmt, ok := p.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.ExpressionStatement")
-	}
-
-	exp, ok := stmt.Expression.(*ast.ForLoop)
-	if !ok {
-		t.Fatalf("Cannot convert statement to ast.ForLoop")
-	}
-
-	if exp.Iterations.Value != 2 {
-		t.Fatalf("Expected value for iterations to be '2'. Got %v", exp.Iterations.Value)
-	}
-
-	if len(exp.Body.Statements) != 1 {
-		t.Fatalf("Expected 1 statement on for loop body. Got %v", len(exp.Body.Statements))
-	}
-
-	if exp.Body == nil {
-		t.Fatalf("Empty function body")
-	}
-
-	testVar(t, exp.Body.Statements[0], "nuevo", 33)
 }

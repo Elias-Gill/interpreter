@@ -1,16 +1,17 @@
 package ast
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/sl2.0/tokens"
 )
 
 func TestString(t *testing.T) {
-	program := &Program{
+	program := Program{
 		Statements: []Statement{
 			&VarStatement{
-				Token: tokens.Token{Type: tokens.VAR, Literal: "let"},
+				Token: tokens.Token{Type: tokens.VAR, Literal: "var"},
 				Identifier: &Identifier{
 					Token: tokens.Token{Type: tokens.IDENT, Literal: "myVar"},
 					Value: "myVar",
@@ -23,7 +24,15 @@ func TestString(t *testing.T) {
 		},
 	}
 
-	if program.ToString(0) != "let myVar = anotherVar;" {
-		t.Errorf("program.String() wrong. got=%q", program.ToString(0))
+	expected := `var statement:
+  identifier: myVar
+  value: 
+    anotherVar
+`
+
+	expected = strings.TrimSpace(expected)
+	actual := strings.TrimSpace(program.ToString(0))
+	if actual != expected {
+		t.Errorf("program.ToString() wrong.\nExpected:\n%s\nGot:\n%s", expected, actual)
 	}
 }
