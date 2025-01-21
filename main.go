@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sl2.0/evaluator"
-	"github.com/sl2.0/objects"
-	"github.com/sl2.0/parser"
 	"github.com/sl2.0/repl"
 )
 
@@ -16,28 +13,42 @@ func main() {
 	const colorNone = "\033[0m"
 
 	// Define flags
-	parserFlag := flag.Bool("parser", false, "Enable parser flag")
-	lexerFlag := flag.Bool("lexer", false, "Enable lexer flag")
-	execute := flag.String("exec", "", "Execute the given file")
+	liveParser := *flag.Bool("parser", false, "Enable parser flag")
+	liveLexer := *flag.Bool("lexer", false, "Enable lexer flag")
+	inputFile := *flag.String("file", "", "Execute the given file")
 
 	// Parse command-line flags
 	flag.Parse()
 
-	if *execute != "" {
-		runProgram(*execute)
+	// Check stdin for data being piped in
+	stat, err := os.Stdin.Stat()
+	if (stat.Mode()&os.ModeCharDevice) == 0 && err == nil {
+		repl.EvaluateProgram(os.Stdin, os.Stdout)
+		return
+	}
+
+	// If a file is given
+	if inputFile != "" {
+		f, err := os.Open(inputFile)
+		if err != nil {
+			fmt.Println("Error opening file: " + err.Error())
+			return
+		}
+
+		repl.EvaluateProgram(f, os.Stdout)
 		return
 	}
 
 	fmt.Print("\nStarting REPL ")
 
 	// Check if either --parser or --lexer flag is provided
-	if *parserFlag {
+	if liveParser {
 		fmt.Printf("in%s parser%s mode:\n", colorMagenta, colorNone)
 		repl.StartLiveParser(os.Stdin, os.Stdout)
 		return
 	}
 
-	if *lexerFlag {
+	if liveLexer {
 		fmt.Printf("in%s lexer%s mode:\n", colorMagenta, colorNone)
 		repl.StartLiveLexer(os.Stdin, os.Stdout)
 		return
@@ -45,39 +56,4 @@ func main() {
 
 	fmt.Printf("in%s eval%s mode:\n", colorMagenta, colorNone)
 	repl.StartREPL(os.Stdin, os.Stdout)
-}
-
-func runProgram(file string) {
-	f, err := os.ReadFile(file)
-	if err != nil {
-		fmt.Println("Error:" + err.Error())
-		return
-	}
-	input := string(f)
-
-	p := parser.NewParser(input)
-	program := p.ParseProgram()
-
-	if p.HasErrors() {
-		for _, msg := range p.Errors() {
-			fmt.Println("\t" + msg + "\n")
-		}
-		return
-	}
-
-	ev := evaluator.NewFromProgram(program)
-	evaluated := ev.EvalProgram(objects.NewStorage())
-
-	if ev.HasErrors() {
-		for _, msg := range p.Errors() {
-			fmt.Println("\t" + msg + "\n")
-		}
-		return
-	}
-
-	if evaluated != nil {
-		fmt.Println(evaluated.Inspect())
-	} else {
-		fmt.Println("Not returned values")
-	}
 }

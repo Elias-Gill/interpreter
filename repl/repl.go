@@ -1,8 +1,10 @@
 package repl
 
 import (
+	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -186,6 +188,43 @@ func StartREPL(in io.Reader, out io.Writer) {
 
 		buffer = ""          // Clear the buffer after evaluation
 		rl.SetPrompt(">>> ") // Reset prompt
+	}
+}
+
+func EvaluateProgram(in *os.File, out *os.File) {
+	inReader := bufio.NewReader(in)
+
+	var input string
+	for {
+		str, err := inReader.ReadString(byte('\n'))
+		if err != nil {
+			break
+		}
+		input += str
+	}
+
+	p := parser.NewParser(input)
+	program := p.ParseProgram()
+
+	if p.HasErrors() {
+		for _, msg := range p.Errors() {
+			fmt.Println("\t" + msg + "\n")
+		}
+		return
+	}
+
+	ev := evaluator.NewFromProgram(program)
+	evaluated := ev.EvalProgram(objects.NewStorage())
+
+	if ev.HasErrors() {
+		printErrors(out, ev.Errors())
+		return
+	}
+
+	if evaluated != nil {
+		fmt.Println(evaluated.Inspect())
+	} else {
+		fmt.Println("Not returned values")
 	}
 }
 
