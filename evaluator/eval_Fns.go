@@ -190,8 +190,12 @@ func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage
 		return args[0]
 	}
 
-	// create a local scope
-	localEnv := objects.NewEnclosedStorage(env)
+	// Create a local scope (with maximum recurssion level)
+	localEnv, err := objects.NewEnclosedStorage(env)
+	if err != nil {
+		return objects.NewError("%s", err.Error())
+	}
+
 	for i, param := range f.Parameters {
 		localEnv.Set(param.Value, args[i])
 	}

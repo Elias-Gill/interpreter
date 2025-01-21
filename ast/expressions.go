@@ -235,7 +235,7 @@ func (f *FunctionCall) ToString(lvl int) string {
 
 	indent := strings.Repeat("  ", lvl)
 	buffer.WriteString(indent + "function call:\n")
-	buffer.WriteString(indent + "  identifier: " + f.Identifier.ToString(lvl) + "\n")
+	buffer.WriteString(indent + "  identifier: " + f.Identifier.ToString(0) + "\n")
 
 	// Print the arguments
 	buffer.WriteString(indent + "  arguments:\n")

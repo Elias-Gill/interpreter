@@ -3,6 +3,8 @@ package evaluator
 import (
 	"strings"
 	"testing"
+
+	"github.com/sl2.0/objects"
 )
 
 func TestIntegerEvaluation(t *testing.T) {
@@ -290,5 +292,27 @@ func TestForLoop(t *testing.T) {
 		}
 
 		testInteger(t, evaluated, tc.expected)
+	}
+}
+
+func TestMaxRecursion(t *testing.T) {
+	expected := "Max level of recursion reached"
+	tcase := `func nuevo() {
+			nuevo();
+		}; 
+		nuevo();
+		`
+
+	evaluated := parseAndEval(t, tcase)
+	if evaluated == nil {
+		t.Errorf("Expected 'Object integer' type. Got <nil>")
+	}
+
+	if evaluated.Type() != objects.ERROR_OBJ {
+		t.Errorf("Expected 'Object integer' type. Got %s", evaluated.Type())
+	}
+
+	if evaluated.Inspect() != expected {
+		t.Errorf("Expected msg '%s'. Got %s", expected, evaluated.Inspect())
 	}
 }
