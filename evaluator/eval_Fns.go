@@ -176,7 +176,7 @@ func (e *Evaluator) evalIfExpression(exp *ast.IfExpression, env *objects.Storage
 func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage) objects.Object {
 	f, ok := e.eval(fun.Identifier, env).(*objects.FunctionObject)
 	if !ok {
-		return objects.NewError("Function '" + fun.Identifier.ToString() + "' not found")
+		return objects.NewError("Function '%s' not found", fun.Identifier.ToString())
 	}
 
 	// check argument list size
@@ -204,6 +204,14 @@ func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage
 	} else {
 		return result
 	}
+}
+
+func (e *Evaluator) evalForLoop(exp *ast.ForLoop, env *objects.Storage) objects.Object {
+	var value objects.Object
+	for i := 0; i < int(exp.Iterations.Value); i++ {
+		value = e.evalBlockStatement(exp.Body, env)
+	}
+	return value
 }
 
 func selectBoolObject(exp bool) *objects.Boolean {

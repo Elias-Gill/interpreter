@@ -1,8 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
-
 	"github.com/sl2.0/ast"
 	"github.com/sl2.0/objects"
 	"github.com/sl2.0/parser"
@@ -90,7 +88,7 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 	case *ast.Identifier:
 		val, ok := env.Get(node.Value)
 		if !ok {
-			return objects.NewError("Cannot resolve identifier: " + node.Value)
+			return objects.NewError("Cannot resolve identifier: %s", node.Value)
 		}
 		return val
 
@@ -116,6 +114,9 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 
 	case *ast.BlockStatement:
 		return e.evalBlockStatement(node, env)
+
+	case *ast.ForLoop:
+		return e.evalForLoop(node, env)
 
 	case *ast.ReturnStatement:
 		val := e.eval(node.ReturnValue, env)
@@ -144,8 +145,7 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 		return &objects.String{Value: node.Value}
 	}
 
-	return objects.NewError(
-		fmt.Sprintf("Cannot evaluate node: %v", node.ToString()))
+	return objects.NewError("Cannot evaluate node: %s", node.ToString())
 }
 
 func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *objects.Storage) objects.Object {

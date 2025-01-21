@@ -124,11 +124,13 @@ func TestInfixComparison(t *testing.T) {
 func TestIfEvaluation(t *testing.T) {
 	testCases := []struct {
 		tcase    string
-		expected bool
+		expected interface{}
 	}{
 		{tcase: "si(-12 + 24 < -12){true}sino{false}", expected: false},
 		{tcase: "si(true){true}sino{false}", expected: true},
 		{tcase: "si(false){true}sino{false}", expected: false},
+		{tcase: "si(false){1}sino{2}", expected: 2},
+		{tcase: "si(true){1}sino{2}", expected: 1},
 		{tcase: `
             var nuevo = 1;
             si (nuevo == 2) {
@@ -146,7 +148,14 @@ func TestIfEvaluation(t *testing.T) {
 			continue
 		}
 
-		testBool(t, evaluated, tc.expected)
+		switch expected := tc.expected.(type) {
+		case bool:
+			testBool(t, evaluated, expected)
+		case int:
+			testInteger(t, evaluated, int64(expected))
+		case int64:
+			testInteger(t, evaluated, expected)
+		}
 	}
 }
 
@@ -256,5 +265,30 @@ func TestFunctionCalls(t *testing.T) {
 			continue
 		}
 		testInteger(t, p, tt.expected)
+	}
+}
+
+func TestForLoop(t *testing.T) {
+	testCases := []struct {
+		tcase    string
+		expected int64
+	}{
+		{tcase: `var nuevo = 0; 
+				 repetir 10 {
+					 var nuevo = nuevo + 1;
+				 } 
+				 nuevo`,
+			expected: 10,
+		},
+	}
+
+	for _, tc := range testCases {
+		evaluated := parseAndEval(t, tc.tcase)
+
+		if evaluated == nil {
+			continue
+		}
+
+		testInteger(t, evaluated, tc.expected)
 	}
 }

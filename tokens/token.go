@@ -40,7 +40,7 @@ const (
 	COMMA    = "COMMA"    // ,
 	ASIGN    = "ASIGN"    // =
 	EQUALS   = "EQUALS"   // ==
-	NOTEQUAL = "NOTEQUAL"
+	NOTEQUAL = "NOTEQUAL" // !=
 	SLASH    = "STROKE"
 
 	// brackets and parenteses
