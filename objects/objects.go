@@ -33,7 +33,7 @@ func (i *Integer) Type() ObjectType {
 	return INTEGER_OBJ
 }
 func (i *Integer) Inspect() string {
-	return fmt.Sprintf("%d", i.Value)
+	return fmt.Sprintf("%v", i.Value)
 }
 
 type Boolean struct {
@@ -55,7 +55,7 @@ func (i *String) Type() ObjectType {
 	return STRING_OBJ
 }
 func (i *String) Inspect() string {
-	return i.Value
+	return fmt.Sprintf("%v", i.Value)
 }
 
 // --- Complex data types ---
@@ -84,7 +84,7 @@ func (r *ReturnObject) Type() ObjectType {
 	return RETURN_OBJ
 }
 func (r *ReturnObject) Inspect() string {
-	return r.Value.Inspect()
+	return fmt.Sprintf("%d", r.Value)
 }
 
 type FunctionObject struct {
@@ -99,9 +99,9 @@ func (f *FunctionObject) Type() ObjectType {
 func (f *FunctionObject) Inspect() string {
 	s := "("
 	for _, param := range f.Parameters {
-		s += param.ToString() + " "
+		s += param.ToString(0) + " "
 	}
 	s += ")"
 
-	return s + "\n" + f.Body.ToString()
+	return s + "\n" + f.Body.ToString(0)
 }

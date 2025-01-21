@@ -176,7 +176,7 @@ func (e *Evaluator) evalIfExpression(exp *ast.IfExpression, env *objects.Storage
 func (e *Evaluator) evalFunctionCall(fun *ast.FunctionCall, env *objects.Storage) objects.Object {
 	f, ok := e.eval(fun.Identifier, env).(*objects.FunctionObject)
 	if !ok {
-		return objects.NewError("Function '%s' not found", fun.Identifier.ToString())
+		return objects.NewError("Function '%s' not found", fun.Identifier.ToString(0))
 	}
 
 	// check argument list size

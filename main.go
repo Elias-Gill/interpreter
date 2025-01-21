@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/sl2.0/repl"
@@ -13,47 +14,67 @@ func main() {
 	const colorNone = "\033[0m"
 
 	// Define flags
-	liveParser := *flag.Bool("parser", false, "Enable parser flag")
-	liveLexer := *flag.Bool("lexer", false, "Enable lexer flag")
-	inputFile := *flag.String("file", "", "Execute the given file")
+	mode := flag.String("mode", "eval", "Available modes: lexer, parser, eval(default)")
+	quiet := flag.Bool("quiet", false, "Suppres unnecesary messages")
+
+	inputFile := flag.String("file", "", "Execute the given file")
+	outputFile := flag.String("o", "", "File to output the result")
+	errFile := flag.String("err", "", "File to output the errors")
 
 	// Parse command-line flags
 	flag.Parse()
 
+	builder := repl.NewReplBuilder().
+		WithStderr(os.Stdout).
+		WithStdout(os.Stdout).
+		WithStdin(os.Stdin)
+
 	// Check stdin for data being piped in
 	stat, err := os.Stdin.Stat()
 	if (stat.Mode()&os.ModeCharDevice) == 0 && err == nil {
-		repl.EvaluateProgram(os.Stdin, os.Stdout)
-		return
-	}
-
-	// If a file is given
-	if inputFile != "" {
-		f, err := os.Open(inputFile)
+		builder = builder.WithStdin(os.Stdin)
+	} else if *inputFile != "" { // File mode
+		f, err := os.Open(*inputFile)
 		if err != nil {
-			fmt.Println("Error opening file: " + err.Error())
-			return
+			log.Fatal("Error opening input file: " + err.Error())
 		}
-
-		repl.EvaluateProgram(f, os.Stdout)
-		return
+		defer f.Close()
+		builder = builder.WithStdin(f)
+	} else { // Interactive mode
+		builder = builder.Interactive()
 	}
 
-	fmt.Print("\nStarting REPL ")
-
-	// Check if either --parser or --lexer flag is provided
-	if liveParser {
-		fmt.Printf("in%s parser%s mode:\n", colorMagenta, colorNone)
-		repl.StartLiveParser(os.Stdin, os.Stdout)
-		return
+	if *outputFile != "" {
+		f, err := os.Open(*outputFile)
+		if err != nil {
+			log.Fatal("Error opening output file: " + err.Error())
+		}
+		defer f.Close()
+		builder = builder.WithStdout(f)
 	}
 
-	if liveLexer {
-		fmt.Printf("in%s lexer%s mode:\n", colorMagenta, colorNone)
-		repl.StartLiveLexer(os.Stdin, os.Stdout)
-		return
+	if *errFile != "" {
+		f, err := os.Open(*errFile)
+		if err != nil {
+			log.Fatal("Error opening error file: " + err.Error())
+		}
+		defer f.Close()
+		builder = builder.WithStderr(f)
 	}
 
-	fmt.Printf("in%s eval%s mode:\n", colorMagenta, colorNone)
-	repl.StartREPL(os.Stdin, os.Stdout)
+	switch *mode {
+	case "lexer":
+		builder = builder.WithMode(repl.LEXER)
+	case "parser":
+		builder = builder.WithMode(repl.PARSER)
+	}
+
+	rplInstance := builder.Build()
+
+	// On quiet mode this lines are not printed
+	if !*quiet {
+		fmt.Printf("Starting REPL in %s%s%s mode...\n", colorMagenta, *mode, colorNone)
+	}
+
+	rplInstance.Run()
 }

@@ -9,7 +9,7 @@ type Node interface {
 	TokenLiteral() string
 
 	// returns a string representation of the statements in the ast
-	ToString() string
+	ToString(int) string
 }
 
 type Expression interface {
@@ -26,11 +26,11 @@ type Program struct {
 	Statements []Statement
 }
 
-func (p *Program) ToString() string {
+func (p *Program) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
 	for _, stmt := range p.Statements {
-		buffer.WriteString(stmt.ToString())
+		buffer.WriteString(stmt.ToString(lvl))
 	}
 
 	return buffer.String()

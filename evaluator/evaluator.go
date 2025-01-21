@@ -94,7 +94,7 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 
 	case *ast.FunctionStatement:
 		f := &objects.FunctionObject{
-			Parameters: node.Paramenters,
+			Parameters: node.Parameters,
 			Body:       node.Body,
 		}
 
@@ -104,7 +104,7 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 
 	case *ast.AnonymousFunction:
 		f := &objects.FunctionObject{
-			Parameters: node.Paramenters,
+			Parameters: node.Parameters,
 			Body:       node.Body,
 		}
 		return f
@@ -145,7 +145,7 @@ func (e *Evaluator) eval(node ast.Node, env *objects.Storage) objects.Object {
 		return &objects.String{Value: node.Value}
 	}
 
-	return objects.NewError("Cannot evaluate node: %s", node.ToString())
+	return objects.NewError("Cannot evaluate node: %s", node.ToString(0))
 }
 
 func (e *Evaluator) evalBlockStatement(node *ast.BlockStatement, env *objects.Storage) objects.Object {

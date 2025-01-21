@@ -71,7 +71,7 @@ func testLiteralExpression(t *testing.T, expression ast.Expression, expected int
 func testBoolLiteral(t *testing.T, exp ast.Expression) bool {
 	value, ok := exp.(*ast.Boolean)
 	if !ok {
-		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString())
+		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString(0))
 		return false
 	}
 
@@ -85,7 +85,7 @@ func testBoolLiteral(t *testing.T, exp ast.Expression) bool {
 func testIntLiteral(t *testing.T, exp ast.Expression, expected int64) bool {
 	number, ok := exp.(*ast.IntegerLiteral)
 	if !ok {
-		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString())
+		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString(0))
 		return false
 	}
 
@@ -100,7 +100,7 @@ func testIntLiteral(t *testing.T, exp ast.Expression, expected int64) bool {
 func testIdentifier(t *testing.T, exp ast.Expression, expected string) bool {
 	ident, ok := exp.(*ast.Identifier)
 	if !ok {
-		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString())
+		t.Errorf("Cannot convert statement to ast.Integer. \n\tGot: %v", exp.ToString(0))
 		return false
 	}
 
@@ -113,8 +113,8 @@ func testIdentifier(t *testing.T, exp ast.Expression, expected string) bool {
 }
 
 func testInfix(t *testing.T, exp ast.Expression, expected string) {
-	if expected != exp.ToString() {
-		t.Errorf("Expected: %s. Got: %s", expected, exp.ToString())
+	if expected != exp.ToString(0) {
+		t.Errorf("Expected: %s. Got: %s", expected, exp.ToString(0))
 		return
 	}
 }
@@ -128,7 +128,7 @@ func testVar(t *testing.T, exp ast.Statement, identifier string, value interface
 
 	v, ok := exp.(*ast.VarStatement)
 	if !ok {
-		t.Errorf("Expected 'var'. Got: %s", exp.ToString())
+		t.Errorf("Expected 'var'. Got: %s", exp.ToString(0))
 		return
 	}
 

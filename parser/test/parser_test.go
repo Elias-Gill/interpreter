@@ -182,8 +182,8 @@ func TestPrefixExpression(t *testing.T) {
 			continue
 		}
 
-		if tc.expectedValue != exp.ToString() {
-			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
+		if tc.expectedValue != exp.ToString(0) {
+			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString(0))
 			continue
 		}
 	}
@@ -280,8 +280,8 @@ func TestOperatorPrecedence(t *testing.T) {
 			continue
 		}
 
-		if tc.expectedValue != exp.ToString() {
-			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString())
+		if tc.expectedValue != exp.ToString(0) {
+			t.Errorf("Expected: %s. Got: %s", tc.expectedValue, exp.ToString(0))
 			continue
 		}
 	}
@@ -357,11 +357,11 @@ func TestFuncDeclaration(t *testing.T) {
 
 	testIdentifier(t, fun.Identifier, "algo")
 
-	if len(fun.Paramenters) != len(param_list) {
-		t.Fatalf("Expected %v parameters. Got %v", len(param_list), len(fun.Paramenters))
+	if len(fun.Parameters) != len(param_list) {
+		t.Fatalf("Expected %v parameters. Got %v", len(param_list), len(fun.Parameters))
 	}
 
-	for i, v := range fun.Paramenters {
+	for i, v := range fun.Parameters {
 		if v.Value != param_list[i] {
 			t.Errorf("Expected parameter name '%s'. Got: %s", v.Value, param_list[i])
 		}
@@ -400,11 +400,11 @@ func TestAnonnymousFunc(t *testing.T) {
 		t.Fatalf("Cannot convert statement to ast.FunctionLiteral")
 	}
 
-	if len(exp.Paramenters) != 2 {
-		t.Fatalf("Expected 2 parameters. Got %v", len(exp.Paramenters))
+	if len(exp.Parameters) != 2 {
+		t.Fatalf("Expected 2 parameters. Got %v", len(exp.Parameters))
 	}
 
-	for i, v := range exp.Paramenters {
+	for i, v := range exp.Parameters {
 		if v.Value != param_list[i] {
 			t.Errorf("Expected function name 'funcion_nueva'. Got: %s", v.Value)
 		}
@@ -456,8 +456,8 @@ func TestFuncCall(t *testing.T) {
 			t.Fatalf("Cannot convert statement to ast.FunctionCall")
 		}
 
-		if exp.Identifier.ToString() != "new_function" {
-			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Identifier.ToString())
+		if exp.Identifier.ToString(0) != "new_function" {
+			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Identifier.ToString(0))
 		}
 
 		if len(exp.Arguments) != 2 {
@@ -465,8 +465,8 @@ func TestFuncCall(t *testing.T) {
 		}
 
 		for i, v := range exp.Arguments {
-			if v.ToString() != args_list[i] {
-				t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString())
+			if v.ToString(0) != args_list[i] {
+				t.Errorf("Expected function name '%s'. Got: %s", args_list[i], v.ToString(0))
 			}
 		}
 	}

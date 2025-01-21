@@ -5,6 +5,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/sl2.0/tokens"
 )
@@ -19,18 +20,20 @@ func (v *VarStatement) statementNode() {}
 func (v *VarStatement) TokenLiteral() string {
 	return v.Token.Literal
 }
-func (v *VarStatement) ToString() string {
+
+func (v *VarStatement) ToString(lvl int) string {
 	var out bytes.Buffer
 
-	out.WriteString(v.TokenLiteral() + " ")
-	out.WriteString(v.Identifier.ToString())
-	out.WriteString(" = ")
+	indent := strings.Repeat("  ", lvl)
+	out.WriteString(indent + "var statement:\n")
+	out.WriteString(indent + "  identifier: " + v.Identifier.ToString(0) + "\n")
+	out.WriteString(indent + "  value: \n")
 
 	if v.Value != nil {
-		out.WriteString(v.Value.ToString())
+		out.WriteString(v.Value.ToString(lvl + 2))
+	} else {
+		out.WriteString("nil")
 	}
-
-	out.WriteString(";")
 
 	return out.String()
 }
@@ -44,16 +47,18 @@ func (v *ReturnStatement) statementNode() {}
 func (v *ReturnStatement) TokenLiteral() string {
 	return v.Token.Literal
 }
-func (r *ReturnStatement) ToString() string {
+func (r *ReturnStatement) ToString(lvl int) string {
 	var out bytes.Buffer
 
-	out.WriteString(r.TokenLiteral() + " ")
+	indent := strings.Repeat("  ", lvl)
+	out.WriteString(indent + "return statement:\n")
+	out.WriteString(indent + "  value: \n")
 
 	if r.ReturnValue != nil {
-		out.WriteString(r.ReturnValue.ToString())
+		out.WriteString(r.ReturnValue.ToString(lvl + 2))
+	} else {
+		out.WriteString("nil")
 	}
-
-	out.WriteString(";")
 
 	return out.String()
 }
@@ -71,12 +76,14 @@ func (v *ExpressionStatement) statementNode() {}
 func (v *ExpressionStatement) TokenLiteral() string {
 	return v.Token.Literal
 }
-func (e *ExpressionStatement) ToString() string {
-	if e.Expression != nil {
-		return e.Expression.ToString()
-	}
+func (e *ExpressionStatement) ToString(lvl int) string {
+	var out bytes.Buffer
 
-	return ""
+	indent := strings.Repeat("  ", lvl)
+	out.WriteString(indent + "expression statement:\n")
+	out.WriteString(indent + " expression: \n" + e.Expression.ToString(lvl+2))
+
+	return out.String()
 }
 
 type BlockStatement struct {
@@ -88,24 +95,24 @@ func (b *BlockStatement) statementNode() {}
 func (b *BlockStatement) TokenLiteral() string {
 	return b.Token.Literal
 }
-func (b *BlockStatement) ToString() string {
+func (b *BlockStatement) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString("{")
+	indent := strings.Repeat("  ", lvl)
+	buffer.WriteString(indent + "block statement:\n")
 	for _, stmt := range b.Statements {
-		buffer.WriteString(stmt.ToString())
+		buffer.WriteString(stmt.ToString(lvl + 1) + "\n")
 	}
-	buffer.WriteString("}")
 
 	return buffer.String()
 }
 
 // Named functions
 type FunctionStatement struct {
-	Paramenters []*Identifier
-	Body        *BlockStatement
-	Identifier  *Identifier
-	Token       tokens.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+	Identifier *Identifier
+	Token      tokens.Token
 }
 
 func NewFunctionStatement(t tokens.Token) *FunctionStatement {
@@ -118,19 +125,18 @@ func (f *FunctionStatement) statementNode() {}
 func (f *FunctionStatement) TokenLiteral() string {
 	return f.Token.Literal
 }
-func (f *FunctionStatement) ToString() string {
+func (f *FunctionStatement) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(f.TokenLiteral())
-	buffer.WriteString(f.Identifier.ToString())
-	buffer.WriteString(" (")
-
-	for _, v := range f.Paramenters {
-		buffer.WriteString(v.ToString() + ", ")
+	indent := strings.Repeat("  ", lvl)
+	buffer.WriteString(indent + "function statement:\n")
+	buffer.WriteString(indent + "  name: " + f.Identifier.ToString(lvl+2) + "\n")
+	buffer.WriteString(indent + "  parameters:\n")
+	for _, v := range f.Parameters {
+		buffer.WriteString(indent + "    " + v.ToString(lvl+2) + "\n")
 	}
-
-	buffer.WriteString(")")
-	buffer.WriteString(f.Body.ToString())
+	buffer.WriteString(indent + "  body:\n")
+	buffer.WriteString(f.Body.ToString(lvl + 2))
 
 	return buffer.String()
 }

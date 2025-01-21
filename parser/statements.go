@@ -109,7 +109,7 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 
 	f.Identifier = ast.NewIdentifier(p.currentToken)
 
-	f.Paramenters = p.parseFuncParameters()
+	f.Parameters = p.parseFuncParameters()
 
 	body := p.parseBlockStatement()
 	if body == nil {

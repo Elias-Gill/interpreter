@@ -5,7 +5,9 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/sl2.0/tokens"
 )
@@ -25,8 +27,9 @@ func (i *Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *Identifier) ToString() string {
-	return i.Value
+func (i *Identifier) ToString(lvl int) string {
+	indent := strings.Repeat("  ", lvl)
+	return fmt.Sprintf("%s%s", indent, i.Value)
 }
 
 type IntegerLiteral struct {
@@ -49,8 +52,9 @@ func (i *IntegerLiteral) expressionNode() {}
 func (i *IntegerLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *IntegerLiteral) ToString() string {
-	return i.TokenLiteral()
+func (i *IntegerLiteral) ToString(lvl int) string {
+	indent := strings.Repeat("  ", lvl)
+	return fmt.Sprintf("%s%s", indent, i.TokenLiteral())
 }
 
 type StringLiteral struct {
@@ -68,8 +72,9 @@ func (i *StringLiteral) expressionNode() {}
 func (i *StringLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *StringLiteral) ToString() string {
-	return i.TokenLiteral()
+func (i *StringLiteral) ToString(lvl int) string {
+	indent := strings.Repeat("  ", lvl)
+	return fmt.Sprintf("%s%s", indent, i.TokenLiteral())
 }
 
 type PrefixExpression struct {
@@ -82,13 +87,14 @@ func (p *PrefixExpression) expressionNode() {}
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
 }
-func (p *PrefixExpression) ToString() string {
+func (p *PrefixExpression) ToString(lvl int) string {
 	var out bytes.Buffer
 
-	out.WriteString("(")
-	out.WriteString(p.Operator)
-	out.WriteString(p.Right.ToString())
-	out.WriteString(")")
+	indent := strings.Repeat("  ", lvl)
+	out.WriteString(indent + "prefix expression:\n")
+	out.WriteString(indent + "  operator: " + p.Operator + "\n")
+	out.WriteString(indent + "  right:\n")
+	out.WriteString(p.Right.ToString(lvl + 2)) // Increase indentation for the right expression
 
 	return out.String()
 }
@@ -104,14 +110,16 @@ func (i *InfixExpression) expressionNode() {}
 func (i *InfixExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *InfixExpression) ToString() string {
+func (i *InfixExpression) ToString(lvl int) string {
 	var out bytes.Buffer
 
-	out.WriteString("(")
-	out.WriteString(i.Left.ToString())
-	out.WriteString(i.Operator)
-	out.WriteString(i.Right.ToString())
-	out.WriteString(")")
+	indent := strings.Repeat("  ", lvl)
+	out.WriteString(indent + "infix expression:\n")
+	out.WriteString(indent + "  left:\n")
+	out.WriteString(i.Left.ToString(lvl+2) + "\n") // Increase indentation for the left expression
+	out.WriteString(indent + " operator: " + i.Operator + "\n")
+	out.WriteString(indent + "  right:\n")
+	out.WriteString(i.Right.ToString(lvl + 2)) // Increase indentation for the right expression
 
 	return out.String()
 }
@@ -134,8 +142,9 @@ func (b *Boolean) expressionNode() {}
 func (b *Boolean) TokenLiteral() string {
 	return b.Token.Literal
 }
-func (b *Boolean) ToString() string {
-	return b.TokenLiteral()
+func (b *Boolean) ToString(lvl int) string {
+	indent := strings.Repeat("  ", lvl)
+	return fmt.Sprintf("%s%s", indent, b.TokenLiteral())
 }
 
 type IfExpression struct {
@@ -155,24 +164,28 @@ func (i *IfExpression) expressionNode() {}
 func (i *IfExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *IfExpression) ToString() string {
+func (i *IfExpression) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(i.TokenLiteral())
-	buffer.WriteString(i.Condition.ToString())
-	buffer.WriteString(i.Consequence.ToString())
+	indent := strings.Repeat("  ", lvl)
+	buffer.WriteString(indent + "if expression:\n")
+	buffer.WriteString(indent + "  condition:\n")
+	buffer.WriteString(i.Condition.ToString(lvl + 2)) // Increase indentation for the condition
+	buffer.WriteString(indent + "  consequence:\n")
+	buffer.WriteString(i.Consequence.ToString(lvl + 2)) // Increase indentation for the consequence
 
 	if i.Alternative != nil {
-		buffer.WriteString("sino" + i.Alternative.ToString())
+		buffer.WriteString(indent + "  alternative:\n")
+		buffer.WriteString(i.Alternative.ToString(lvl + 2)) // Increase indentation for the alternative
 	}
 
 	return buffer.String()
 }
 
 type AnonymousFunction struct {
-	Paramenters []*Identifier
-	Body        *BlockStatement
-	Token       tokens.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+	Token      tokens.Token
 }
 
 func NewAnonymousFunction(t tokens.Token) *AnonymousFunction {
@@ -185,18 +198,17 @@ func (f *AnonymousFunction) expressionNode() {}
 func (f *AnonymousFunction) TokenLiteral() string {
 	return f.Token.Literal
 }
-func (f *AnonymousFunction) ToString() string {
+func (f *AnonymousFunction) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(f.TokenLiteral())
-	buffer.WriteString("(")
-
-	for _, v := range f.Paramenters {
-		buffer.WriteString(v.ToString() + ", ")
+	indent := strings.Repeat("  ", lvl)
+	buffer.WriteString(indent + "anonymous function:\n")
+	buffer.WriteString(indent + "  parameters:\n")
+	for _, v := range f.Parameters {
+		buffer.WriteString(indent + "    " + v.ToString(lvl) + "\n")
 	}
-
-	buffer.WriteString(")")
-	buffer.WriteString(f.Body.ToString())
+	buffer.WriteString(indent + "  body:\n")
+	buffer.WriteString(f.Body.ToString(lvl + 2)) // Increase indentation for the body
 
 	return buffer.String()
 }
@@ -218,19 +230,18 @@ func (f *FunctionCall) expressionNode() {}
 func (f *FunctionCall) TokenLiteral() string {
 	return f.Token.Literal
 }
-func (f *FunctionCall) ToString() string {
+func (f *FunctionCall) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(f.Identifier.ToString())
-	buffer.WriteString(f.TokenLiteral())
+	indent := strings.Repeat("  ", lvl)
+	buffer.WriteString(indent + "function call:\n")
+	buffer.WriteString(indent + "  identifier: " + f.Identifier.ToString(lvl) + "\n")
 
-	for i := 0; i < len(f.Arguments)-1; i++ {
-		v := f.Arguments[i]
-		buffer.WriteString(v.ToString() + ", ")
+	// Print the arguments
+	buffer.WriteString(indent + "  arguments:\n")
+	for _, arg := range f.Arguments {
+		buffer.WriteString(arg.ToString(lvl+2) + "\n") // Increase indentation for arguments
 	}
-
-	buffer.WriteString(f.Arguments[len(f.Arguments)-1].ToString())
-	buffer.WriteString(")")
 
 	return buffer.String()
 }
@@ -251,12 +262,15 @@ func (f *ForLoop) expressionNode() {}
 func (f *ForLoop) TokenLiteral() string {
 	return f.Token.Literal
 }
-func (f *ForLoop) ToString() string {
+func (f *ForLoop) ToString(lvl int) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(f.TokenLiteral() + " ")
-	buffer.WriteString(f.Iterations.ToString())
-	buffer.WriteString(f.Body.ToString())
+	indent := strings.Repeat("  ", lvl)
+
+	buffer.WriteString(indent + "for loop:\n")
+	buffer.WriteString(indent + " iterations: " + f.Iterations.ToString(0) + "\n")
+	buffer.WriteString(indent + " body:\n")
+	buffer.WriteString(f.Body.ToString(lvl + 2))
 
 	return buffer.String()
 }

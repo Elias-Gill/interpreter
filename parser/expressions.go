@@ -104,7 +104,7 @@ func (p *Parser) parseAnonnymousFunction() ast.Expression {
 
 	params := p.parseFuncParameters()
 
-	f.Paramenters = params
+	f.Parameters = params
 
 	body := p.parseBlockStatement()
 	if body == nil {
