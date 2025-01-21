@@ -76,10 +76,11 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block.Statements = []ast.Statement{}
 
 	if !p.advanceIfCurToken(tokens.LBRAC) {
+		p.errors = append(p.errors, "Missing opening '{' on block statement")
 		return nil
 	}
 
-	for !p.curTokenIs(tokens.RBRAC) {
+	for !p.curTokenIs(tokens.RBRAC) && !p.curTokenIs(tokens.EOF) {
 		stmt := p.parseStatement()
 
 		if stmt != nil {
@@ -92,6 +93,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	if !p.advanceIfCurToken(tokens.RBRAC) {
+		p.errors = append(p.errors, "Missing closing '}' on block statement")
 		return nil
 	}
 
