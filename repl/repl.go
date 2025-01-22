@@ -96,6 +96,8 @@ func (r Repl) runFromFile() {
 		}
 		input += str
 	}
+
+	r.evaluateOrPanic(input)
 }
 
 // Evaluate results in a separate subrutine. If the max-timeout is reached

@@ -40,6 +40,7 @@ func main() {
 			log.Fatal("Error opening input file: " + err.Error())
 		}
 		defer f.Close()
+
 		builder = builder.WithStdin(f)
 	} else { // Interactive mode
 		builder = builder.Interactive()
@@ -68,17 +69,21 @@ func main() {
 		builder = builder.WithMode(repl.LEXER)
 	case "parser":
 		builder = builder.WithMode(repl.PARSER)
+	case "eval":
+		builder = builder.WithMode(repl.EVAL)
+	default:
+		log.Fatal("Invalid mode")
 	}
 
 	// Set max time execution for evaluation
 	builder = builder.WithTimeout(*maxTime)
 
-	rplInstance := builder.Build()
+	replInstance := builder.Build()
 
 	// On quiet mode this lines are not printed
 	if !*quiet {
 		fmt.Printf("Starting REPL in %s%s%s mode...\n", colorMagenta, *mode, colorNone)
 	}
 
-	rplInstance.Run()
+	replInstance.Run()
 }
