@@ -25,16 +25,11 @@ func main() {
 	// Parse command-line flags
 	flag.Parse()
 
-	builder := repl.NewReplBuilder().
-		WithStderr(os.Stdout).
-		WithStdout(os.Stdout).
-		WithStdin(os.Stdin)
+	builder := repl.NewReplBuilder()
 
 	// Check stdin for data being piped in
-	stat, err := os.Stdin.Stat()
-	if (stat.Mode()&os.ModeCharDevice) == 0 && err == nil {
-		builder = builder.WithStdin(os.Stdin)
-	} else if *inputFile != "" { // File mode
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode()&os.ModeCharDevice) != 0 && *inputFile != "" {
 		f, err := os.Open(*inputFile)
 		if err != nil {
 			log.Fatal("Error opening input file: " + err.Error())

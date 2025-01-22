@@ -156,34 +156,20 @@ func (r Repl) execute(in string) {
 	program := p.ParseProgram()
 
 	if len(p.Errors()) != 0 {
-		printErrors(r.outFile, p.Errors())
+		printErrors(r.errFile, p.Errors())
 	} else {
 		ev := evaluator.NewFromProgram(program)
 		evaluated := ev.EvalProgram(r.env)
 
 		if ev.HasErrors() {
-			if p.HasErrors() {
-				printErrors(r.errFile, p.Errors())
-			}
-
-			ev := evaluator.NewFromProgram(program)
-			evaluated := ev.EvalProgram(objects.NewStorage())
-
-			if ev.HasErrors() {
-				printErrors(r.errFile, p.Errors())
-				return
-			}
-
-			if evaluated != nil {
-				fmt.Fprintln(r.outFile, evaluated.Inspect())
-			} else {
-				fmt.Fprintln(r.outFile, "No returned values")
-			}
 			printErrors(r.errFile, ev.Errors())
-		} else if evaluated != nil {
+			return
+		}
+
+		if evaluated != nil {
 			fmt.Fprintln(r.outFile, evaluated.Inspect())
 		} else {
-			fmt.Fprintln(r.outFile)
+			fmt.Fprintln(r.outFile, "No returned values")
 		}
 	}
 }
