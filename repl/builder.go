@@ -21,6 +21,7 @@ func NewReplBuilder() ReplBuilder {
 			env:         objects.NewStorage(),
 			mode:        EVAL,
 			interactive: false,
+			maxTime:     40000,
 		},
 	}
 }
@@ -42,6 +43,12 @@ func (r ReplBuilder) WithStderr(file io.WriteCloser) ReplBuilder {
 
 func (r ReplBuilder) WithMode(mode mode) ReplBuilder {
 	r.repl.mode = mode
+	return r
+}
+
+// Timeout in miliseconds for max execution time for evaluation
+func (r ReplBuilder) WithTimeout(miliseconds int64) ReplBuilder {
+	r.repl.maxTime = miliseconds
 	return r
 }
 

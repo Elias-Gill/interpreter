@@ -2,9 +2,12 @@ package repl
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/chzyer/readline"
 
@@ -33,17 +36,19 @@ type Repl struct {
 
 	rlInstance *readline.Instance
 	env        *objects.Storage
+
+	maxTime int64
 }
 
 func (r Repl) Run() {
 	if r.interactive {
-		r.runInteractive()
+		r.runInteractively()
 	} else {
-		r.fromFile()
+		r.runFromFile()
 	}
 }
 
-func (r Repl) runInteractive() {
+func (r Repl) runInteractively() {
 	defer r.rlInstance.Close()
 	buffer := ""
 	for {
@@ -71,15 +76,8 @@ func (r Repl) runInteractive() {
 			break
 		}
 
-		// Evaluate results
-		switch r.mode {
-		case LEXER:
-			r.lexe(buffer)
-		case PARSER:
-			r.parse(buffer)
-		default:
-			r.evaluate(buffer)
-		}
+		// Run or panic
+		r.evaluateOrPanic(buffer)
 
 		// Reset for next command
 		buffer = ""
@@ -87,7 +85,7 @@ func (r Repl) runInteractive() {
 	}
 }
 
-func (r Repl) fromFile() {
+func (r Repl) runFromFile() {
 	inReader := bufio.NewReader(r.inFile)
 
 	var input string
@@ -98,16 +96,34 @@ func (r Repl) fromFile() {
 		}
 		input += str
 	}
+}
 
-	switch r.mode {
-	case LEXER:
-		r.lexe(input)
-		return
-	case PARSER:
-		r.parse(input)
-		return
-	default:
-		r.evaluate(input)
+// Evaluate results in a separate subrutine. If the max-timeout is reached
+// then kill the entire program.
+func (r Repl) evaluateOrPanic(input string) {
+	c := make(chan struct{})
+	go func() {
+		switch r.mode {
+		case LEXER:
+			r.lexe(input)
+		case PARSER:
+			r.parse(input)
+		default:
+			r.execute(input)
+		}
+		c <- struct{}{}
+	}()
+
+	// Wait for the evaluator to done or panic on timeout reached
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.maxTime)*time.Millisecond)
+	defer cancel()
+
+	select {
+	case <-ctx.Done():
+		fmt.Fprint(r.errFile, "Timeout execution reached\n")
+		os.Exit(1)
+	case <-c:
+		break
 	}
 }
 
@@ -132,7 +148,7 @@ func (r Repl) parse(in string) {
 	}
 }
 
-func (r Repl) evaluate(in string) {
+func (r Repl) execute(in string) {
 	// Parse and evaluate the complete input
 	p := parser.NewParser(in)
 	program := p.ParseProgram()

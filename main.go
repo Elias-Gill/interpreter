@@ -16,6 +16,7 @@ func main() {
 	// Define flags
 	mode := flag.String("mode", "eval", "Available modes: lexer, parser, eval(default)")
 	quiet := flag.Bool("quiet", false, "Suppres unnecesary messages")
+	maxTime := flag.Int64("max-time", 40000, "Max time for execution")
 
 	inputFile := flag.String("file", "", "Execute the given file")
 	outputFile := flag.String("o", "", "File to output the result")
@@ -68,6 +69,9 @@ func main() {
 	case "parser":
 		builder = builder.WithMode(repl.PARSER)
 	}
+
+	// Set max time execution for evaluation
+	builder = builder.WithTimeout(*maxTime)
 
 	rplInstance := builder.Build()
 
