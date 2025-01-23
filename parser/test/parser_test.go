@@ -15,10 +15,10 @@ func TestFuncCall(t *testing.T) {
 		{
 			input: `new_function(x, y + 1)`,
 			args: []string{
-				`x`,
+				`Identifier: x`,
 				`infix expression:
  left:
-    y
+    Identifier: y
  operator: +
  right:
     Integer: 1`,
@@ -29,7 +29,7 @@ func TestFuncCall(t *testing.T) {
 			args: []string{
 				`infix expression:
  left:
-    x
+    Identifier: x
  operator: *
  right:
     infix expression:
@@ -40,7 +40,7 @@ func TestFuncCall(t *testing.T) {
         Integer: 33`,
 				`infix expression:
  left:
-    y
+    Identifier: y
  operator: +
  right:
     Integer: 1`,
@@ -69,8 +69,8 @@ func TestFuncCall(t *testing.T) {
 			t.Fatalf("Cannot convert statement to ast.FunctionCall")
 		}
 
-		if exp.Identifier.ToString(0) != "new_function" {
-			t.Fatalf("Expected identifier 'new_function'. Got %v", exp.Identifier.ToString(0))
+		if exp.Identifier.ToString(0) != "Identifier: new_function\n" {
+			t.Fatalf("Expected 'Identifier: new_function'. Got %v", "'"+exp.Identifier.ToString(0)+"'")
 		}
 
 		if len(exp.Arguments) != 2 {

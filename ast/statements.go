@@ -26,7 +26,7 @@ func (v *VarStatement) ToString(lvl int) string {
 
 	indent := strings.Repeat("  ", lvl)
 	out.WriteString(indent + "var statement:\n")
-	out.WriteString(indent + "  identifier: " + v.Identifier.ToString(0) + "\n")
+	out.WriteString(v.Identifier.ToString(lvl+1))
 	out.WriteString(indent + "  value: \n")
 
 	if v.Value != nil {

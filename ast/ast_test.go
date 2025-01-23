@@ -25,9 +25,9 @@ func TestString(t *testing.T) {
 	}
 
 	expected := `var statement:
-  identifier: myVar
+  Identifier: myVar
   value: 
-    anotherVar
+    Identifier: anotherVar
 `
 
 	expected = strings.TrimSpace(expected)

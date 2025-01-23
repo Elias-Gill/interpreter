@@ -29,7 +29,7 @@ func (i *Identifier) TokenLiteral() string {
 }
 func (i *Identifier) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%s%s", indent, i.Value)
+	return fmt.Sprintf("%sIdentifier: %s\n", indent, i.Value)
 }
 
 type IntegerLiteral struct {
@@ -54,7 +54,7 @@ func (i *IntegerLiteral) TokenLiteral() string {
 }
 func (i *IntegerLiteral) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%sInteger: %s", indent, i.TokenLiteral())
+	return fmt.Sprintf("%sInteger: %s\n", indent, i.TokenLiteral())
 }
 
 type StringLiteral struct {
@@ -74,7 +74,7 @@ func (i *StringLiteral) TokenLiteral() string {
 }
 func (i *StringLiteral) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%sString: %s", indent, i.TokenLiteral())
+	return fmt.Sprintf("%sString: %s\n", indent, i.TokenLiteral())
 }
 
 type PrefixExpression struct {
@@ -116,7 +116,7 @@ func (i *InfixExpression) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
 	out.WriteString(indent + "infix expression:\n")
 	out.WriteString(indent + " left:\n")
-	out.WriteString(i.Left.ToString(lvl+2) + "\n") // Increase indentation for the left expression
+	out.WriteString(i.Left.ToString(lvl+2)) // Increase indentation for the left expression
 	out.WriteString(indent + " operator: " + i.Operator + "\n")
 	out.WriteString(indent + " right:\n")
 	out.WriteString(i.Right.ToString(lvl + 2)) // Increase indentation for the right expression
@@ -144,7 +144,7 @@ func (b *Boolean) TokenLiteral() string {
 }
 func (b *Boolean) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%sBool: %s", indent, b.TokenLiteral())
+	return fmt.Sprintf("%sBool: %s\n", indent, b.TokenLiteral())
 }
 
 type IfExpression struct {
