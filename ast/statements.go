@@ -131,10 +131,10 @@ func (f *FunctionStatement) ToString(lvl int) string {
 
 	indent := strings.Repeat("  ", lvl)
 	buffer.WriteString(indent + "function statement:\n")
-	buffer.WriteString(indent + "  name: " + f.Identifier.ToString(lvl+2) + "\n")
+	buffer.WriteString("  " + f.Identifier.ToString(lvl))
 	buffer.WriteString(indent + "  parameters:\n")
 	for _, v := range f.Parameters {
-		buffer.WriteString(indent + "    " + v.ToString(lvl+2) + "\n")
+		buffer.WriteString(v.ToString(lvl+3))
 	}
 	buffer.WriteString(indent + "  body:\n")
 	buffer.WriteString(f.Body.ToString(lvl + 2))
