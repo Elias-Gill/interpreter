@@ -27,9 +27,11 @@ func main() {
 
 	builder := repl.NewReplBuilder()
 
-	// Check stdin for data being piped in
+	// Check if data is being piped into Stdin
 	stat, _ := os.Stdin.Stat()
-	if (stat.Mode()&os.ModeCharDevice) != 0 && *inputFile != "" {
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		builder = builder.WithStdin(os.Stdin)
+	} else if *inputFile != "" { // If a file is provided
 		f, err := os.Open(*inputFile)
 		if err != nil {
 			log.Fatal("Error opening input file: " + err.Error())
@@ -37,7 +39,7 @@ func main() {
 		defer f.Close()
 
 		builder = builder.WithStdin(f)
-	} else { // Interactive mode
+	} else { // Run REPL on interactive mode
 		builder = builder.Interactive()
 	}
 

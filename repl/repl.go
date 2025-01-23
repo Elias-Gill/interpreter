@@ -77,7 +77,7 @@ func (r Repl) runInteractively() {
 		}
 
 		// Run or panic
-		r.evaluateOrPanic(buffer)
+		r.evaluateWithTimeout(buffer)
 
 		// Reset for next command
 		buffer = ""
@@ -88,21 +88,30 @@ func (r Repl) runInteractively() {
 func (r Repl) runFromFile() {
 	inReader := bufio.NewReader(r.inFile)
 
-	var input string
+	var input strings.Builder
 	for {
-		str, err := inReader.ReadString(byte('\n'))
+		str, err := inReader.ReadString('\n')
 		if err != nil {
+			// If the error if not from EOF
+			if err != io.EOF {
+				fmt.Fprintf(r.errFile, "Error reading input: %v", err)
+				return
+			}
+
+			if len(str) > 0 {
+				input.WriteString(str)
+			}
 			break
 		}
-		input += str
+		input.WriteString(str)
 	}
 
-	r.evaluateOrPanic(input)
+	r.evaluateWithTimeout(input.String())
 }
 
 // Evaluate results in a separate subrutine. If the max-timeout is reached
 // then kill the entire program.
-func (r Repl) evaluateOrPanic(input string) {
+func (r Repl) evaluateWithTimeout(input string) {
 	c := make(chan struct{})
 	go func() {
 		switch r.mode {
