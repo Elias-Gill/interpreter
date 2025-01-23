@@ -21,7 +21,7 @@ func TestFuncCall(t *testing.T) {
     y
  operator: +
  right:
-    1`,
+    Integer: 1`,
 			},
 		},
 		{
@@ -34,16 +34,16 @@ func TestFuncCall(t *testing.T) {
  right:
     infix expression:
      left:
-        4
+        Integer: 4
      operator: +
      right:
-        33`,
+        Integer: 33`,
 				`infix expression:
  left:
     y
  operator: +
  right:
-    1`,
+    Integer: 1`,
 			},
 		},
 	}

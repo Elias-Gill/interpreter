@@ -54,7 +54,7 @@ func (i *IntegerLiteral) TokenLiteral() string {
 }
 func (i *IntegerLiteral) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%s%s", indent, i.TokenLiteral())
+	return fmt.Sprintf("%sInteger: %s", indent, i.TokenLiteral())
 }
 
 type StringLiteral struct {
@@ -74,7 +74,7 @@ func (i *StringLiteral) TokenLiteral() string {
 }
 func (i *StringLiteral) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%s%s", indent, i.TokenLiteral())
+	return fmt.Sprintf("%sString: %s", indent, i.TokenLiteral())
 }
 
 type PrefixExpression struct {
@@ -144,7 +144,7 @@ func (b *Boolean) TokenLiteral() string {
 }
 func (b *Boolean) ToString(lvl int) string {
 	indent := strings.Repeat("  ", lvl)
-	return fmt.Sprintf("%s%s", indent, b.TokenLiteral())
+	return fmt.Sprintf("%sBool: %s", indent, b.TokenLiteral())
 }
 
 type IfExpression struct {

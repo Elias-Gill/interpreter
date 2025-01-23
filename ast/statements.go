@@ -35,6 +35,7 @@ func (v *VarStatement) ToString(lvl int) string {
 		out.WriteString("nil")
 	}
 
+	out.WriteString("\n")
 	return out.String()
 }
 
